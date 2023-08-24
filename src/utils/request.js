@@ -13,9 +13,11 @@ const service = axios.create({
 // request interceptor
 service.interceptors.request.use(
   config => {
-    // do something before request is sent
-    if (store.getters.token) {
-      config.headers['X-Token'] = getToken()
+    // 用户Token
+    let userToken = store.state.user.token
+    if (userToken) {
+      let Authorization = 'Bearer ' + getToken()
+      config.headers['Authorization'] = Authorization
     }
     return config
   },
@@ -56,17 +58,19 @@ service.interceptors.response.use(
           })
         })
       }
-      return Promise.reject(new Error(res.message || 'Error'))
+      return Promise.reject(new Error(res.msg || res.message || 'Error'))
     } else {
       return res
     }
   },
+
   error => {
+    debugger
     console.log('err' + error) // for debug
-    Toast.fail({
-      message: error.message,
-      duration: 1.5 * 1000
-    })
+    // Toast.fail({
+    //   message: error.message,
+    //   duration: 1.5 * 1000
+    // })
     return Promise.reject(error)
   }
 )

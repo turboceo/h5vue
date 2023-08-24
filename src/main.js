@@ -7,34 +7,71 @@ import 'utils/permission'
 import SvgIcon from 'components/SvgIcon'
 import '@/icons' // icon
 import '@/style/common.scss'
-import { Lazyload } from 'vant'
+
+import { Row, Col, Lazyload, Button, Icon, Toast, NavBar, DropdownMenu, DropdownItem, Popover, Field, Checkbox, Empty, Skeleton, Popup, NoticeBar, Divider, Dialog, Grid, GridItem, Image, Uploader, ActionSheet } from 'vant'
 import defaultSettings from '@/settings'
+import DirectiveInstall from '@/directive'
 
-/**
- * If you don't want to use mock-server
- * you want to use MockJs for mock api
- * you can execute: mockXHR()
- *
- * Currently MockJs will be used in the production environment,
- * please remove it before going online! ! !
- */
-import { mockXHR } from '../mock'
+// import * as fundebug from "fundebug-javascript";
+// import FundebugVue from "fundebug-vue";
 
-if (process.env.NODE_ENV === 'production') {
-  mockXHR()
-}
+// let isDev = process.env.NODE_ENV === 'development'
+// if(!isDev) {
+//   fundebug.init({
+//     apikey: "fb11642bf4ece2267df6e10ee88d1d15e8e2d1e29a71bb04b8fef3918093861d"
+//   })
+//   new FundebugVue(fundebug).installVueErrorHandler(Vue); // Vue 2.x 
+// }
+
+Vue.use(DirectiveInstall)
+
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Button)
+Vue.use(Icon)
+Vue.use(Toast)
+Vue.use(NavBar)
+Vue.use(DropdownMenu)
+Vue.use(DropdownItem)
+Vue.use(Popover)
+Vue.use(Field)
+Vue.use(Checkbox)
+Vue.use(Empty)
+Vue.use(Skeleton)
+Vue.use(Popup)
+Vue.use(NoticeBar)
+Vue.use(Divider)
+Vue.use(Dialog)
+Vue.use(Grid)
+Vue.use(GridItem)
+Vue.use(Image)
+Vue.use(Uploader)
+Vue.use(ActionSheet)
 
 // options 为可选参数，无则不传
 Vue.use(Lazyload)
 
 Vue.component('svg-icon', SvgIcon)
 
-if (process.env.NODE_ENV === 'development' && defaultSettings.vconsole) {
-  const VConsole = require('vconsole')
-  // eslint-disable-next-line
-  const my_console = new VConsole()
-}
-// var vConsole = new VConsole(option)
+import DrawerSearch from 'components/DrawerSearch'
+Vue.component('DrawerSearch', DrawerSearch)
+
+Vue.prototype.$delay = (second) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, second * 1000);
+  });
+};
+
+import debounce from "lodash/debounce";
+Vue.prototype.$debounce = debounce
+
+// if (process.env.NODE_ENV === 'development' && defaultSettings.vconsole) {
+//   const VConsole = require('vconsole')
+//   // eslint-disable-next-line
+//   const my_console = new VConsole()
+// }
 
 Vue.config.productionTip = false
 

@@ -1,0 +1,50 @@
+<div
+  class="card-section flex space-between"
+  style="font-size: 1.5rem; border-bottom: 1px solid #151515"
+>
+  <div class="car--no">
+    <span>{{ form.tmsWaybillVo.truckNo }}</span>
+    <span
+      style="
+        margin-left: 1rem;
+        font-size: 16px;
+        font-weight: 700;
+        color: #027db4;
+      "
+      >当前状态:
+    </span>
+    <span style="font-size: 16px; font-weight: 400; color: #027db4"
+      >{{ progressStateDesc }}</span
+    >
+  </div>
+</div>
+
+<div class="pyzl-drawer__content">
+  <Card
+    title="整改验收"
+    v-show="show.rectificationAcceptance"
+    :disabled="disabled.rectificationAcceptance"
+  >
+    <el-row :gutter="10">
+      <el-form
+        :model="form"
+        size="mini"
+        label-width="8em"
+        label-position="left"
+        class="small-margin--bottom"
+      >
+        <!-- 承运商反馈 -->
+        <el-col :span="24">
+          <el-form-item label="验收结论：" prop="radio2">
+            <el-radio v-model="form.radio2" label="1"
+              >已按要求完成整改事项</el-radio
+            >
+            <el-radio v-model="form.radio2" label="2"
+              >未能按要求完成全部整改</el-radio
+            >
+          </el-form-item>
+        </el-col>
+      </el-form>
+    </el-row>
+  </Card>
+</div>

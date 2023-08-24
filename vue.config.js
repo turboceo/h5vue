@@ -21,6 +21,16 @@ const cdn = {
   ]
 }
 
+if (IS_PRODUCTION) {
+  cdn.js = [
+    'vendors/vue.min.js',
+    'vendors/vue-router.min.js',
+    'vendors/vuex.min.js',
+    'vendors/axios.min.js',
+    'vendors/js.cookie.min.js'
+  ]
+}
+
 const externals = {
   vue: 'Vue',
   'vue-router': 'VueRouter',
@@ -57,7 +67,8 @@ module.exports = {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
-        target: `http://127.0.0.1:${port}/mock`,
+        // target: `http://39.108.133.107:8080`,
+        target: `http://192.168.3.94:8080`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
