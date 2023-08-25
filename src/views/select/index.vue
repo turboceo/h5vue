@@ -556,8 +556,8 @@ export default {
     doAction (action, options) {
       let actionStrategies = {
         /**
-                 * 进行检查
-                 */
+         * 进行检查
+         */
         doCheck: async function () {
           if (this.loading.doCheck) return
 
@@ -586,8 +586,8 @@ export default {
         },
 
         /**
-                 * 显示检查项列表
-                 */
+         * 显示检查项列表
+         */
         showFilterList: function (listModeType) {
           this.listMode = true
           this.listModeType = listModeType
@@ -608,8 +608,8 @@ export default {
     },
 
     /**
-         * 处理车辆输入
-         */
+     * 处理车辆输入
+     */
     handleTypeInput () {
       this.show.typeSearchPanel = true
     }

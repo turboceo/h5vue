@@ -24,13 +24,15 @@ const state = {
 
 const actions = {
   updateCheckListAsync: ({ commit }, payload = {}) => {
+    let hasOwn = ({}).hasOwnProperty
     let params = {
       briefCont: '',
       ruleType: 1
     }
-    if (payload.type === 'sgs' && payload && payload.sgsType) {
+    if (payload.type === 'sgs' && hasOwn.call(payload, 'sgsType') && hasOwn.call(payload, 'ruleTimeType')) {
+      // debugger
       params.ruleType = 2
-      params.ruleTimeType = +payload.sgsType
+      params.ruleTimeType = +payload.ruleTimeType
     }
     // 获取检查列表
     return listTransRole(params)

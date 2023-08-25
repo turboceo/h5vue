@@ -353,8 +353,8 @@ export default {
     },
 
     /**
-         * 加载Sgs规则列表
-         */
+     * 加载Sgs规则列表
+     */
     getSgsRuleList () {
       this.isLoadingSgsRuleList = true
       listSgsRule().then(res => {

@@ -1,84 +1,84 @@
 <template>
-    <div class="check">
-        <div class="check--inner" :class="{ 'has--error': errorMsg }">
-            <van-notice-bar v-show="show.notication" left-icon="info-o" class="notification-bar">
-                {{ errorMsg }}
-            </van-notice-bar>
+  <div class="check">
+    <div class="check--inner" :class="{ 'has--error': errorMsg }">
+      <van-notice-bar v-show="show.notication" left-icon="info-o" class="notification-bar">
+        {{ errorMsg }}
+      </van-notice-bar>
 
-            <!-- 卡片 -->
-            <CardBox title="运单信息" type="simple" :show-toggler="false">
-                <!-- 检查地点 -->
-                <!-- <van-field v-model="form.location" center clearable required label="检查地点" placeholder="请选择" readonly>
+      <!-- 卡片 -->
+      <CardBox title="运单信息" type="simple" :show-toggler="false">
+        <!-- 检查地点 -->
+        <!-- <van-field v-model="form.location" center clearable required label="检查地点" placeholder="请选择" readonly>
                     <template #button>
                         <van-button :loading="loading.getLocation" @click="debounceActionHandler('getLocation')"
                             size="small" type="info" icon="location">获取定位</van-button>
                     </template>
                 </van-field> -->
 
-                <!-- 车牌号 -->
-                <van-field readonly :value="form.vehiNo" center required label="车牌号" placeholder="请选择车牌号"
-                    @click-input="show.vehiNoList = true">
-                    <template #button>
-                        <van-uploader :before-read="beforeRead" :after-read="afterRead">
-                            <van-button icon="photograph" size="small" type="info">拍照识别</van-button>
-                        </van-uploader>
-                    </template>
-                </van-field>
+        <!-- 车牌号 -->
+        <van-field readonly :value="form.vehiNo" center required label="车牌号" placeholder="请选择车牌号"
+          @click-input="show.vehiNoList = true">
+          <template #button>
+            <van-uploader :before-read="beforeRead" :after-read="afterRead">
+              <van-button icon="photograph" size="small" type="info">拍照识别</van-button>
+            </van-uploader>
+          </template>
+        </van-field>
 
-                <!-- 其它信息 -->
-                <div class="extra-info" v-show="showExtraInfo">
-                    <van-divider dashed>其它信息</van-divider>
-                    <!-- 挂车号 -->
-                    <van-field readonly :value="form.trailerNo" center disabled label="挂车号" placeholder=""></van-field>
-                    <!-- 承运商 -->
-                    <van-field v-model="form.splName" center disabled label="承运商" placeholder="">
-                    </van-field>
-                    <!-- 客户 -->
-                    <van-field v-model="form.client" center disabled label="客户" placeholder="">
-                    </van-field>
-                </div>
-
-                <template v-if="$route.query.type === 'sgs'">
-                    <div class="tab-bar">
-                        <div class="tab-item" :class="{ 'is--current': sgsType === 1 }"
-                            @click="debounceActionHandler('changeSgsType', 1)">巡检</div>
-                        <div class="tab-item" :class="{ 'is--current': sgsType === 2 }"
-                            @click="debounceActionHandler('changeSgsType', 2)">系统影像分析</div>
-                        <div class="tab-item" :class="{ 'is--current': sgsType === 3 }"
-                            @click="debounceActionHandler('changeSgsType', 3)">自检视频巡查</div>
-                    </div>
-
-                    <Card1Panel :sgs-type="sgsType" :sgs-form="sgsForm"></Card1Panel>
-                </template>
-
-                <!-- 操作栏 -->
-                <div class="fixed--bottom flex justify-center check--action" style="z-index: 2">
-                    <van-button :disabled="disabled.doCheck" style="width: 80%;" :loading="loading.doCheck"
-                        @click="debounceActionHandler('doCheck')" type="info" loading-type="spinner" loading-text="正在处理..."
-                        block>进行检查</van-button>
-                </div>
-            </CardBox>
-
-            <!-- 运单列表 -->
-            <van-action-sheet v-model="show.deliNoList" title="选择运单">
-                <ul class="dropdown--list is--static p-15">
-                    <li class="dropdown--item" v-for="(item, $index) in deliList" :key="$index">
-                        <van-checkbox v-model="item.checked" shape="square" @change="handleDeliNoRowCheck"></van-checkbox>
-                        <div class="dropdown--item__info">
-                            <p>车牌号:{{ item.truckNo }}</p>
-                            <p>货品名: {{ item.cargoName }}</p>
-                            <p>提货点: {{ item.unloadAt }}</p>
-                        </div>
-                    </li>
-                </ul>
-            </van-action-sheet>
-
-            <!-- 车牌号抽屉 -->
-            <DrawerSearch v-model="show.vehiNoList">
-                <CarSearchPanel @confirm="handleCarNoSelect" @close="show.vehiNoList = false"></CarSearchPanel>
-            </DrawerSearch>
+        <!-- 其它信息 -->
+        <div class="extra-info" v-show="showExtraInfo">
+          <van-divider dashed>其它信息</van-divider>
+          <!-- 挂车号 -->
+          <van-field readonly :value="form.trailerNo" center disabled label="挂车号" placeholder=""></van-field>
+          <!-- 承运商 -->
+          <van-field v-model="form.splName" center disabled label="承运商" placeholder="">
+          </van-field>
+          <!-- 客户 -->
+          <van-field v-model="form.client" center disabled label="客户" placeholder="">
+          </van-field>
         </div>
+
+        <template v-if="$route.query.type === 'sgs'">
+          <div class="tab-bar">
+            <div class="tab-item" :class="{ 'is--current': sgsType === 1 }"
+              @click="debounceActionHandler('changeSgsType', 1)">巡检</div>
+            <div class="tab-item" :class="{ 'is--current': sgsType === 2 }"
+              @click="debounceActionHandler('changeSgsType', 2)">系统影像分析</div>
+            <div class="tab-item" :class="{ 'is--current': sgsType === 3 }"
+              @click="debounceActionHandler('changeSgsType', 3)">自检视频巡查</div>
+          </div>
+
+          <Card1Panel :sgs-type="sgsType" :sgs-form="sgsForm"></Card1Panel>
+        </template>
+
+        <!-- 操作栏 -->
+        <div class="fixed--bottom flex justify-center check--action" style="z-index: 2">
+          <van-button :disabled="disabled.doCheck" style="width: 80%;" :loading="loading.doCheck"
+            @click="debounceActionHandler('doCheck')" type="info" loading-type="spinner" loading-text="正在处理..."
+            block>进行检查</van-button>
+        </div>
+      </CardBox>
+
+      <!-- 运单列表 -->
+      <van-action-sheet v-model="show.deliNoList" title="选择运单">
+        <ul class="dropdown--list is--static p-15">
+          <li class="dropdown--item" v-for="(item, $index) in deliList" :key="$index">
+            <van-checkbox v-model="item.checked" shape="square" @change="handleDeliNoRowCheck"></van-checkbox>
+            <div class="dropdown--item__info">
+              <p>车牌号:{{ item.truckNo }}</p>
+              <p>货品名: {{ item.cargoName }}</p>
+              <p>提货点: {{ item.unloadAt }}</p>
+            </div>
+          </li>
+        </ul>
+      </van-action-sheet>
+
+      <!-- 车牌号抽屉 -->
+      <DrawerSearch v-model="show.vehiNoList">
+        <CarSearchPanel @confirm="handleCarNoSelect" @close="show.vehiNoList = false"></CarSearchPanel>
+      </DrawerSearch>
     </div>
+  </div>
 </template>
 
 <script>
@@ -205,9 +205,9 @@ export default {
         },
 
         /**
-                 * 更改SGS巡检类型
-                 * @param {Number} type SGS巡检类型
-                 */
+         * 更改SGS巡检类型
+         * @param {Number} type SGS巡检类型
+         */
         changeSgsType (type) {
           this.sgsType = type
           this.show.deliNoList = false
@@ -302,13 +302,26 @@ export default {
           let d = this.sgsForm
           localStorage.setItem('sgsForm', JSON.stringify(d))
         }
+
+        debugger
+        // TODO:
+        // - 增加参数
+        let rotueQuery = {
+          deliNo,
+          type
+        }
+
+        if (this.sgsType === 3) {
+          Object.assign(rotueQuery, {
+            sgsType: this.sgsType,
+            ruleTimeType: this.sgsForm.ruleTimeType
+          })
+        }
+
         this.$router.push({
           name: 'select',
           // 路由参数
-          query: {
-            deliNo,
-            type
-          }
+          query: rotueQuery
         })
       }
       let t = setTimeout(() => {
@@ -469,7 +482,6 @@ export default {
           ])
 
           // 表单验证
-
           try {
             await runMiddleware(this)
             console.log(`Run Middleware::))`)
@@ -534,144 +546,144 @@ export default {
 $dropdown-bg: #f7f8fa;
 
 .check {
-    &--inner {
-        padding: 15px;
+  &--inner {
+    padding: 15px;
 
-        &.has--error {
-            padding-top: 50px;
-        }
+    &.has--error {
+      padding-top: 50px;
     }
+  }
 }
 
 .dropdown--overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .dropdown--item {
-    display: flex;
-    padding: 5px 10px;
-    background: $dropdown-bg;
-    color: #323233;
-    border-radius: 99px;
+  display: flex;
+  padding: 5px 10px;
+  background: $dropdown-bg;
+  color: #323233;
+  border-radius: 99px;
 
-    border-radius: 5px;
-    margin-bottom: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
 
-    &__info {
-        flex: 1;
-        margin-left: 10px;
-        font-size: 15px;
+  &__info {
+    flex: 1;
+    margin-left: 10px;
+    font-size: 15px;
 
-        p {
-            margin: 4px;
-        }
-
-        p:nth-child(1) {
-            font-size: 20px;
-        }
+    p {
+      margin: 4px;
     }
+
+    p:nth-child(1) {
+      font-size: 20px;
+    }
+  }
 }
 
 // 通知栏
 .notification-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
 }
 
 .deli--container {
-    background: white;
+  background: white;
 }
 
 .check--action {
-    padding-top: 15px;
-    padding-bottom: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .table-row {
-    position: relative;
+  position: relative;
 
-    &::after {
-        position: absolute;
-        content: "";
-        height: 1px;
-        background: #d5d5d5;
-        width: 100%;
-        top: 100%;
+  &::after {
+    position: absolute;
+    content: "";
+    height: 1px;
+    background: #d5d5d5;
+    width: 100%;
+    top: 100%;
+  }
+
+  &.is-head::after {
+    width: calc(100% - 60px);
+    left: 60px;
+    height: 2px;
+  }
+
+  span {
+    // background: #fff;
+    height: 35px;
+    flex: 1;
+
+    &.header-cell {
+      font-weight: 500;
     }
 
-    &.is-head::after {
-        width: calc(100% - 60px);
-        left: 60px;
-        height: 2px;
+    &.checkbox-cell {
+      flex: 0 0 60px;
     }
 
-    span {
-        // background: #fff;
-        height: 35px;
-        flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-        &.header-cell {
-            font-weight: 500;
-        }
+    color: #151515;
+    font-weight: 350;
 
-        &.checkbox-cell {
-            flex: 0 0 60px;
-        }
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        color: #151515;
-        font-weight: 350;
-
-        &.is--important {
-            color: #be0004;
-        }
-
-        &.hidden {
-            visibility: hidden;
-        }
-
-        @at-root .w100 & {
-            flex: 0 0 100px;
-        }
+    &.is--important {
+      color: #be0004;
     }
+
+    &.hidden {
+      visibility: hidden;
+    }
+
+    @at-root .w100 & {
+      flex: 0 0 100px;
+    }
+  }
 }
 
 // Tab Bar
 .tab {
-    &-bar {
-        display: flex;
-        align-items: flex-end;
-        background: whitesmoke;
-        padding: 10px;
-        margin-top: 20px;
-        flex-wrap: nowrap;
-        white-space: nowrap;
-        overflow-x: auto;
-    }
+  &-bar {
+    display: flex;
+    align-items: flex-end;
+    background: whitesmoke;
+    padding: 10px;
+    margin-top: 20px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
 
-    &-item {
-        padding: 5px 8px;
-        color: #151515;
-        background: #fefefe;
-        margin-right: 10px;
-        border-radius: 5px;
+  &-item {
+    padding: 5px 8px;
+    color: #151515;
+    background: #fefefe;
+    margin-right: 10px;
+    border-radius: 5px;
 
-        &.is--current {
-            background: #8d9faf;
-            color: #fefefe;
-            // padding: 12px 24px;
-        }
+    &.is--current {
+      background: #8d9faf;
+      color: #fefefe;
+      // padding: 12px 24px;
     }
+  }
 }
 </style>
