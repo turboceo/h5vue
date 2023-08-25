@@ -20,101 +20,105 @@
 
 <script>
 // ===> Components
-import CarInfoList from "./CarInfoList.vue";
+import CarInfoList from './CarInfoList.vue'
 import { Search, Toast } from 'vant'
-import { listTruck } from "@/api/system/truck";
+import { listTruck } from '@/api/system/truck'
 
 export default {
-    name: 'CarSearchPanel',
+  name: 'CarSearchPanel',
 
-    components: {
-        CarInfoList,
-        [Search.name]: Search,
-        [Toast.name]: Toast,
-    },
+  components: {
+    CarInfoList,
+    [Search.name]: Search,
+    [Toast.name]: Toast
+  },
 
-    data() {
-        return {
-            form: {
-                vehiNo: ''
-            },
-            vehiList: [],
-        }
-    },
+  data () {
+    return {
+      form: {
+        vehiNo: ''
+      },
+      vehiList: []
+    }
+  },
 
-    computed: {
-        /**
+  computed: {
+    /**
          * 当前被勾选的项目
          */
-        currentItem() {
-            return this.vehiList.find(item => item.checked)
-        },
-
-        isDisabledCofirm() {
-            if (!this.currentItem) return true
-            return false
-        }
+    currentItem () {
+      return this.vehiList.find(item => item.checked)
     },
 
-    methods: {
-        /**
+    isDisabledCofirm () {
+      if (!this.currentItem) return true
+      return false
+    }
+  },
+
+  methods: {
+    /**
          * 选择车牌号
          * @param {Boolean} checked
          */
-        handleVehiNoRowCheck(data) {
-            let { item, list } = data
-            if (list.length > 1) {
-                list.forEach(item => {
-                    item.checked = false
-                })
-            }
-            item.checked = !item.checked
-        },
-
-        /**
-         * 处理车辆输入
-         */
-        handleCarNoInput() {
-            Toast.loading({
-                message: "查询中...",
-                forbidClick: true,
-            });
-            let { vehiNo } = this.form;
-            listTruck({
-                vehiNo,
-                vehiType: "2", // 车头号
-            }).then((res) => {
-                this.$toast.clear();
-                let len = res.rows.length;
-                if (len === 0) {
-                    this.$toast("暂无数据");
-                    return;
-                }
-                let rowItemAdapter = item => {
-                    item.checked = false;
-                    return item;
-                }
-                this.vehiList = res.rows.map(rowItemAdapter);
-            });
-        },
-
-        handleCancel() {
-            this.$emit('close')
-        },
-
-        handleConfirm() {
-            this.$emit('confirm', this.currentItem);
-            this.handleCancel()
-        }
+    handleVehiNoRowCheck (data) {
+      let { item, list } = data
+      if (list.length > 1) {
+        list.forEach(item => {
+          item.checked = false
+        })
+      }
+      item.checked = !item.checked
     },
 
-    created() {
-        // +++++++++++ 节流优化 +++++++++++
-        this.debounceHandleCarNoInput = this.$debounce(this.handleCarNoInput, 250);
-        this.debounceHandleConfirm = this.$debounce(this.handleConfirm, 250);
-        this.debounceHandleCancel = this.$debounce(this.handleCancel, 250);
-        this.debounceHandleVehiNoRowCheck = this.$debounce(this.handleVehiNoRowCheck, 250)
+    /**
+     * 处理车辆输入
+     */
+    handleCarNoInput () {
+      Toast.loading({
+        message: '查询中...',
+        forbidClick: true
+      })
+      let { vehiNo } = this.form
+      listTruck({
+        vehiNo,
+        vehiType: '2' // 车头号
+      }).then((res) => {
+        Toast.clear()
+        let len = res.rows.length
+        if (len === 0) {
+          this.$toast('暂无数据')
+          return
+        }
+        let rowItemAdapter = item => {
+          item.checked = false
+          return item
+        }
+        this.vehiList = res.rows.map(rowItemAdapter)
+      }).catch(err => {
+        Toast.clear()
+        console.log('log err:')
+        console.log(err)
+      })
+    },
+
+    handleCancel () {
+      this.$emit('close')
+    },
+
+    handleConfirm () {
+      this.$emit('confirm', this.currentItem)
+      this.handleCancel()
     }
+  },
+
+  created () {
+    // +++++++++++ 节流优化 +++++++++++
+    this.debounceHandleCarNoInput = this.$debounce(this.handleCarNoInput, 250)
+    this.debounceHandleConfirm = this.$debounce(this.handleConfirm, 250)
+    this.debounceHandleCancel = this.$debounce(this.handleCancel, 250)
+    this.debounceHandleVehiNoRowCheck = this.$debounce(this.handleVehiNoRowCheck, 250)
+  }
 }
 </script>
 

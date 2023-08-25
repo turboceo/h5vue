@@ -12,6 +12,10 @@ import { Row, Col, Lazyload, Button, Icon, Toast, NavBar, DropdownMenu, Dropdown
 import defaultSettings from '@/settings'
 import DirectiveInstall from '@/directive'
 
+import DrawerSearch from 'components/DrawerSearch'
+
+import debounce from 'lodash/debounce'
+
 // import * as fundebug from "fundebug-javascript";
 // import FundebugVue from "fundebug-vue";
 
@@ -20,7 +24,7 @@ import DirectiveInstall from '@/directive'
 //   fundebug.init({
 //     apikey: "fb11642bf4ece2267df6e10ee88d1d15e8e2d1e29a71bb04b8fef3918093861d"
 //   })
-//   new FundebugVue(fundebug).installVueErrorHandler(Vue); // Vue 2.x 
+//   new FundebugVue(fundebug).installVueErrorHandler(Vue); // Vue 2.x
 // }
 
 Vue.use(DirectiveInstall)
@@ -52,27 +56,9 @@ Vue.use(ActionSheet)
 Vue.use(Lazyload)
 
 Vue.component('svg-icon', SvgIcon)
-
-import DrawerSearch from 'components/DrawerSearch'
 Vue.component('DrawerSearch', DrawerSearch)
 
-Vue.prototype.$delay = (second) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, second * 1000);
-  });
-};
-
-import debounce from "lodash/debounce";
 Vue.prototype.$debounce = debounce
-
-// if (process.env.NODE_ENV === 'development' && defaultSettings.vconsole) {
-//   const VConsole = require('vconsole')
-//   // eslint-disable-next-line
-//   const my_console = new VConsole()
-// }
-
 Vue.config.productionTip = false
 
 new Vue({

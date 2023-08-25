@@ -19,13 +19,13 @@
   </div>
 </template>
 <script>
-import debounce from "lodash/debounce";
+import debounce from 'lodash/debounce'
 import { Field, Icon, Button } from 'vant'
 import { mapActions } from 'vuex'
 
 export default {
   name: 'Login',
-  data() {
+  data () {
     return {
       username: '',
       password: '',
@@ -39,20 +39,20 @@ export default {
     }
   },
   methods: {
-    switchPasswordType() {
+    switchPasswordType () {
       this.passwordType = this.passwordType === 'password' ? 'text' : 'password'
     },
 
-    async handleLogin() {
-      let username = this.username.trim();
-      let password = this.password.trim();
-      if (username === "") {
-        this.errorMsg = "请输入帐号";
-        return;
+    async handleLogin () {
+      let username = this.username.trim()
+      let password = this.password.trim()
+      if (username === '') {
+        this.errorMsg = '请输入帐号'
+        return
       }
-      if (password === "") {
-        this.errorMsg = "请输入密码";
-        return;
+      if (password === '') {
+        this.errorMsg = '请输入密码'
+        return
       }
 
       const data = {
@@ -60,7 +60,7 @@ export default {
         password: password,
         openId: this.openId,
         $router: this.$router,
-        $route: this.$route,
+        $route: this.$route
       }
 
       try {
@@ -96,16 +96,16 @@ export default {
   components: {
     [Field.name]: Field,
     [Icon.name]: Icon,
-    [Button.name]: Button,
+    [Button.name]: Button
   },
 
-  created() {
-    if(process.env.NODE_ENV === 'development') {
+  created () {
+    if (process.env.NODE_ENV === 'development') {
       this.username = 'admin@pyzl'
-      this.password = 'qc123_!@ZX'
+      this.password = '123456'
     }
     // 节流优化
-    this.debounceHandleLogin = debounce(this.handleLogin, 500);
+    this.debounceHandleLogin = debounce(this.handleLogin, 500)
     let q = this.$route.query
     if (q.openId) {
       this.openId = q.openId
@@ -115,7 +115,6 @@ export default {
     if (opendIdQueryArr && opendIdQueryArr[1]) {
       let openId = opendIdQueryArr[1]
       location.replace(location.origin + '/#/login?openId=' + openId)
-      return
     }
   }
 }
