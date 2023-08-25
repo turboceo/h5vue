@@ -24,7 +24,7 @@
                     <div class="requirement-popup--container">
                         <van-notice-bar wrapable :scrollable="false" color="#1989fa" background="#ecf9ff"
                             left-icon="info-o">
-                            请至少上传一张图片或者视频以表明当前检查正常
+                            请至少上传一张图片或视频以表明当前检查正常
                         </van-notice-bar>
                         <div class="icon--group is--center is-requirement--popup">
                             <Uploader @upload-success="handleRequirementPhotoUploadSuccess" accept="image/*">
@@ -463,9 +463,30 @@ export default {
     },
 
     handleEndCheck (state) {
+      function beforeClose (action, done) {
+        if (action === 'confirm') {
+          this.handleSubmit([])
+            .then((res) => {
+              Toast('操作成功')
+              done()
+              this.$router.replace({
+                name: 'home'
+              })
+            })
+            .catch((err) => {
+              console.log(err)
+              Toast(err.message || '操作失败')
+              done()
+            })
+        } else {
+          done()
+        }
+      }
+
       let submitList = this.submitList
       let isListEmpty = submitList.length === 0
       let type = this.form.type
+
       if (isListEmpty && type === '') {
         let __checkType__ = this.__checkType__
 
@@ -476,25 +497,7 @@ export default {
         }
 
         console.log('策略1')
-        function beforeClose (action, done) {
-          if (action === 'confirm') {
-            this.handleSubmit([])
-              .then((res) => {
-                Toast('操作成功')
-                done()
-                this.$router.replace({
-                  name: 'home'
-                })
-              })
-              .catch((err) => {
-                console.log(err)
-                Toast(err.message || '操作失败')
-                done()
-              })
-          } else {
-            done()
-          }
-        }
+
         Dialog.confirm({
           message: '当前检查一切正常，是否确认?',
           beforeClose: beforeClose.bind(this)
@@ -529,8 +532,8 @@ export default {
     },
 
     /**
-         * 确认操作
-         */
+     * 确认操作
+     */
     handleConfirm () {
       this.isSubmiting = true
       this.handleSubmit(this.previewList)
