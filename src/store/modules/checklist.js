@@ -2,7 +2,7 @@
  * 检查项目模块
  * @store
  */
-import { listTransRole } from "@/api/system/transRole";
+import { listTransRole } from '@/api/system/transRole'
 
 /**
 * 检查项适配器
@@ -10,13 +10,13 @@ import { listTransRole } from "@/api/system/transRole";
 */
 let transRoleItemAdapter = (item) => {
   // 设置全部检查项为合规
-  item.model = 0;
-  item.showForm = false;
+  item.model = 0
+  item.showForm = false
   // 备注
-  item.remark = "";
-  item.fileList = [];
-  return item;
-};
+  item.remark = ''
+  item.fileList = []
+  return item
+}
 
 const state = {
   checkList: []
@@ -24,10 +24,18 @@ const state = {
 
 const actions = {
   updateCheckListAsync: ({ commit }, payload = {}) => {
+    let params = {
+      briefCont: '',
+      ruleType: 1
+    }
+    if (payload.type === 'sgs' && payload && payload.sgsType) {
+      params.ruleType = 2
+      params.ruleTimeType = +payload.sgsType
+    }
     // 获取检查列表
-    return listTransRole()
+    return listTransRole(params)
       .then((res) => {
-        let list = res.rows.map(transRoleItemAdapter);
+        let list = res.rows.map(transRoleItemAdapter)
         commit('updateCheckList', list)
         return list
       })
@@ -35,12 +43,12 @@ const actions = {
         // Toast("请求异常");
         console.log('log updateCheckListAsync err:')
         console.log(err)
-      });
+      })
   }
 }
 
 const mutations = {
-  updateCheckList(state, list) {
+  updateCheckList (state, list) {
     state.checkList = list
   }
 }

@@ -162,16 +162,16 @@
         </div>
     </div>
 </template>
-  
+
 <script>
-import { deepClone } from "@/utils/index";
+import { deepClone } from '@/utils/index'
 import { checkItemFactory } from './util'
 
-import { delOss } from "@/api/system/oss";
-import ListMode from "@/components/ListMode/index.vue";
+import { delOss } from '@/api/system/oss'
+import ListMode from '@/components/ListMode/index.vue'
 import CardBox from 'components/CardBox/IndexView'
 import Uploader from 'components/Uploader.vue'
-import { Cell, Toast, Radio, RadioGroup } from 'vant'
+import { Cell, Toast, Radio, RadioGroup, Dialog } from 'vant'
 
 import TypeSearchPanel from './TypeSearchPanel/index.vue'
 
@@ -179,459 +179,455 @@ import WeixinClosePageMixin from '@/mixins/WeixinClosePageMixin'
 
 import SubmitMixin from './SubmitMixin'
 
-let ListModeMixin = {
-    data() {
-        return {
-            listMode: false,
-            listModeType: -1,
-        };
-    },
-};
-
 import CheckListMixin from './CheckListMixin'
 
-import { Dialog } from 'vant';
-
-import { addRealMonitor } from "@/api/system/realMonitor";
+import { addRealMonitor } from '@/api/system/realMonitor'
 import { addSgsMonitor } from '@/api/system/sgsMonitor'
 
-const RequirementMixin = {
-    data() {
-        return {
-            showRequirementActionSheet: false,
-            requirementFileList: [],
-            isHandlingRequirement: false,
-        }
-    },
-
-    computed: {
-        shouldDisabledRequirementSubmit() {
-            return this.requirementFileList.length === 0
-        }
-    },
-
-    methods: {
-        async handleRequirementSubmit() {
-            let __checkType__ = this.__checkType__
-
-            if (this.requirementFileList.length === 0) {
-                Toast("请至少要上传一张图片或者一个视频");
-                return
-            }
-
-            let evidPic = this.requirementFileList.filter(item => item.type == 'photo').map(item => item.url).join(',') || ""
-            let evidVid = this.requirementFileList.filter(item => item.type == 'video').map(item => item.url).join(',') || ""
-
-            let waybillId = this.deliNo
-
-
-
-            let sendStrategies = {
-                real: function (list) {
-                    let tmsRealMoniterDetailsList = []
-                    let data = {
-                        // 运单Id
-                        waybillId,
-                        // 结果列表
-                        tmsRealMoniterDetailsList,
-                        evidPic,
-                        evidVid,
-                    };
-
-                    addRealMonitor(data).then(res => {
-                        debugger
-                        console.log(res)
-                        this.showRequirementActionSheet = false
-                        this.$router.replace({
-                            name: 'home'
-                        })
-                    }).catch(error => {
-                        debugger
-                        Toast(error && error.msg || '操作失败')
-                    })
-                },
-
-                sgs: function (list) {
-                    let tmsSgsMoniterDetails = []
-                    let data = {
-                        // 运单Id
-                        waybillId: this.deliNo,
-                        // 结果列表
-                        tmsSgsMoniterDetails,
-                        evidPic,
-                        evidVid,
-                    };
-
-                    debugger
-
-                    addSgsMonitor(data).then(res => {
-                        debugger
-                        console.log(res)
-                        this.showRequirementActionSheet = false
-                        this.$router.replace({
-                            name: 'home'
-                        })
-                    }).catch(error => {
-                        debugger
-                        Toast(error && error.msg || '操作失败')
-                    })
-                }
-            }
-
-            let func = sendStrategies && sendStrategies[__checkType__]
-            func && func.call(this, this.requirementFileList)
-        },
-
-        handleRequirementPhotoUploadSuccess(data) {
-            data.file.type = 'photo'
-            this.requirementFileList.push(data.file)
-        },
-
-        handleRequirementVideoUploadSuccess(data) {
-            data.file.type = 'video'
-            this.requirementFileList.push(data.file)
-        },
-
-        handleRequirementFileItemRemove(item) {
-            this.$toast("正在删除...");
-            let ossId = item.ossId;
-            let list = this.requirementFileList;
-            let $index = list.indexOf(item);
-            list.splice($index, 1);
-            // OSS删除
-            delOss(ossId).then((res) => {
-                if (res.code === 200) {
-                    this.$toast("删除成功");
-                    return;
-                }
-                this.$toast("删除失败");
-            });
-        }
-    },
-    created() {
-        // if(process.env.NODE_ENV === 'development') {
-        //     this.requirementFileList = [
-        //         { "ossId": "1663415902280806401", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/25480707b75943fa8b3fd2e7788069b8.png", "fileName": "iShot_2023-05-15_16.52.54.png", "type": "photo" }, { "ossId": "1663415953115770882", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/443f43a6cad44be5b32f1ddcf52b6764.mp4", "fileName": "testvideo.mp4", "type": "video" },
-        //         { "ossId": "1663415902280806402", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/25480707b75943fa8b3fd2e7788069b8.png", "fileName": "iShot_2023-05-15_16.52.54.png", "type": "photo" }
-        //     ]
-        // }
+let ListModeMixin = {
+  data () {
+    return {
+      listMode: false,
+      listModeType: -1
     }
+  }
+}
+
+const RequirementMixin = {
+  data () {
+    return {
+      showRequirementActionSheet: false,
+      requirementFileList: [],
+      isHandlingRequirement: false
+    }
+  },
+
+  computed: {
+    shouldDisabledRequirementSubmit () {
+      return this.requirementFileList.length === 0
+    }
+  },
+
+  methods: {
+    async handleRequirementSubmit () {
+      let __checkType__ = this.__checkType__
+
+      if (this.requirementFileList.length === 0) {
+        Toast('请至少要上传一张图片或者一个视频')
+        return
+      }
+
+      let evidPic = this.requirementFileList.filter(item => item.type == 'photo').map(item => item.url).join(',') || ''
+      let evidVid = this.requirementFileList.filter(item => item.type == 'video').map(item => item.url).join(',') || ''
+
+      let waybillId = this.deliNo
+
+      let sendStrategies = {
+        real: function (list) {
+          let tmsRealMoniterDetailsList = []
+          let data = {
+            // 运单Id
+            waybillId,
+            // 结果列表
+            tmsRealMoniterDetailsList,
+            evidPic,
+            evidVid
+          }
+
+          addRealMonitor(data).then(res => {
+            debugger
+            console.log(res)
+            this.showRequirementActionSheet = false
+            this.$router.replace({
+              name: 'home'
+            })
+          }).catch(error => {
+            debugger
+            Toast(error && error.msg || '操作失败')
+          })
+        },
+
+        sgs: function (list) {
+          let tmsSgsMoniterDetails = []
+          let data = {
+            // 运单Id
+            waybillId: this.deliNo,
+            // 结果列表
+            tmsSgsMoniterDetails,
+            evidPic,
+            evidVid
+          }
+
+          debugger
+
+          addSgsMonitor(data).then(res => {
+            debugger
+            console.log(res)
+            this.showRequirementActionSheet = false
+            this.$router.replace({
+              name: 'home'
+            })
+          }).catch(error => {
+            debugger
+            Toast(error && error.msg || '操作失败')
+          })
+        }
+      }
+
+      let func = sendStrategies && sendStrategies[__checkType__]
+      func && func.call(this, this.requirementFileList)
+    },
+
+    handleRequirementPhotoUploadSuccess (data) {
+      data.file.type = 'photo'
+      this.requirementFileList.push(data.file)
+    },
+
+    handleRequirementVideoUploadSuccess (data) {
+      data.file.type = 'video'
+      this.requirementFileList.push(data.file)
+    },
+
+    handleRequirementFileItemRemove (item) {
+      this.$toast('正在删除...')
+      let ossId = item.ossId
+      let list = this.requirementFileList
+      let $index = list.indexOf(item)
+      list.splice($index, 1)
+      // OSS删除
+      delOss(ossId).then((res) => {
+        if (res.code === 200) {
+          this.$toast('删除成功')
+          return
+        }
+        this.$toast('删除失败')
+      })
+    }
+  },
+  created () {
+    // if(process.env.NODE_ENV === 'development') {
+    //     this.requirementFileList = [
+    //         { "ossId": "1663415902280806401", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/25480707b75943fa8b3fd2e7788069b8.png", "fileName": "iShot_2023-05-15_16.52.54.png", "type": "photo" }, { "ossId": "1663415953115770882", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/443f43a6cad44be5b32f1ddcf52b6764.mp4", "fileName": "testvideo.mp4", "type": "video" },
+    //         { "ossId": "1663415902280806402", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/25480707b75943fa8b3fd2e7788069b8.png", "fileName": "iShot_2023-05-15_16.52.54.png", "type": "photo" }
+    //     ]
+    // }
+  }
 }
 
 export default {
-    name: "SelectView",
+  name: 'SelectView',
 
-    mixins: [
-        SubmitMixin,
-        ListModeMixin,
-        WeixinClosePageMixin,
-        CheckListMixin,
+  mixins: [
+    SubmitMixin,
+    ListModeMixin,
+    WeixinClosePageMixin,
+    CheckListMixin,
 
-        // @date 2023-05-29
-        RequirementMixin
-    ],
+    // @date 2023-05-29
+    RequirementMixin
+  ],
 
-    components: {
-        ListMode,
-        CardBox,
-        Uploader,
-        [Cell.name]: Cell,
-        [Radio.name]: Radio,
-        [RadioGroup.name]: RadioGroup,
-        TypeSearchPanel
+  components: {
+    ListMode,
+    CardBox,
+    Uploader,
+    [Cell.name]: Cell,
+    [Radio.name]: Radio,
+    [RadioGroup.name]: RadioGroup,
+    TypeSearchPanel
+  },
+
+  data () {
+    return {
+      // 运单号
+      deliNo: '',
+
+      showConfirm: false,
+      showFormExtra: true,
+      errorMsg: '',
+      loading: {},
+
+      form: checkItemFactory(),
+
+      // 已选的检查项
+      selectList: [],
+
+      show: {
+        notication: false,
+        typeFilter: false,
+
+        typeSearchPanel: false
+      },
+
+      list: [],
+      filterTypeList: [],
+
+      submitList: [],
+
+      // 预览列表
+      previewList: []
+    }
+  },
+
+  methods: {
+    handleModelChange (name) {
+      debugger
+      console.log(this.form.required)
     },
 
-    data() {
-        return {
-            // 运单号
-            deliNo: '',
-
-            showConfirm: false,
-            showFormExtra: true,
-            errorMsg: "",
-            loading: {},
-
-            form: checkItemFactory(),
-
-            // 已选的检查项
-            selectList: [],
-
-            show: {
-                notication: false,
-                typeFilter: false,
-
-                typeSearchPanel: false
-            },
-
-            list: [],
-            filterTypeList: [],
-
-            submitList: [],
-
-            // 预览列表
-            previewList: []
-        };
-    },
-
-    methods: {
-        handleModelChange(name) {
-            debugger
-            console.log(this.form.required)
-        },
-
-        /**
+    /**
          * 添加文件
          * @param {File} file 文件对象表示
          */
-        addFile(file) {
-            this.form.fileList.push(file)
-        },
-
-        handlePhotoUploadSuccess(data) {
-            this.addFile(data.file)
-        },
-
-        handleVideoUploadSuccess(data) {
-            this.addFile(data.file)
-        },
-
-        handleFileUploadSuccess(data) {
-            this.addFile(data.file)
-        },
-
-        /**
-         * 验证当前表单项是否有效
-         */
-        isCurrentFormItemValidate() {
-            let f = this.form;
-            let type = f.type.trim();
-            if (type === "") {
-                Toast("请选择违规内容");
-                return false;
-            }
-            if (f.id === null) {
-                Toast("请选择违规内容");
-                return false;
-            }
-            if (f.required) {
-                let remark = f.remark.trim();
-                if (remark === "") {
-                    Toast("请输入违规描述");
-                    return false;
-                }
-                let fileList = f.fileList;
-                if (fileList.length === 0) {
-                    Toast("请上传现场记录的附件");
-                    return false;
-                }
-            }
-            return true
-        },
-
-        /**
-         * 继续检查
-         */
-        handleContinueCheck() {
-            if (!this.isCurrentFormItemValidate()) {
-                return
-            }
-            // 深复制数据
-            this.submitList.push(deepClone(this.form));
-            this.form = checkItemFactory();
-            return true
-        },
-
-        /**
-         * 删除文件处理
-         */
-        handleFileItemRemove(item) {
-            this.$toast("正在删除...");
-            debugger
-            let ossId = item.ossId;
-            let list = this.form.fileList;
-            let $index = list.indexOf(item);
-            list.splice($index, 1);
-            // OSS删除
-            delOss(ossId).then((res) => {
-                if (res.code === 200) {
-                    this.$toast("删除成功");
-                    return;
-                }
-                this.$toast("删除失败");
-            });
-        },
-
-        handleIconItemClicked(type) {
-            console.log("log type:");
-            console.log(type);
-        },
-
-        handleEndCheck(state) {
-            let submitList = this.submitList
-            let isListEmpty = submitList.length === 0
-            let type = this.form.type
-            if (isListEmpty && type === '') {
-                let __checkType__ = this.__checkType__
-
-                // 以下策略只处理属地检查
-                if (__checkType__ !== 'dep') {
-                    this.showRequirementActionSheet = true
-                    return
-                }
-
-                console.log('策略1')
-                function beforeClose(action, done) {
-                    if (action === 'confirm') {
-                        this.handleSubmit([])
-                            .then((res) => {
-                                Toast("操作成功");
-                                done()
-                                this.$router.replace({
-                                    name: 'home'
-                                })
-                            })
-                            .catch((err) => {
-                                console.log(err);
-                                Toast(err.message || "操作失败")
-                                done()
-                            });
-                    } else {
-                        done();
-                    }
-                }
-                Dialog.confirm({
-                    message: '当前检查一切正常，是否确认?',
-                    beforeClose: beforeClose.bind(this),
-                })
-                return
-            }
-            if (isListEmpty && type !== '' && !this.isCurrentFormItemValidate()) {
-                console.log('策略2')
-                return
-            }
-            if (!isListEmpty && type === '') {
-                console.log('策略3')
-                let ret1 = deepClone(this.submitList)
-                this.previewList = ret1
-                this.showConfirm = true;
-                return
-            }
-            if (!isListEmpty && type !== '' && !this.isCurrentFormItemValidate()) {
-                console.log('策略4')
-                return
-            }
-            console.log('策略5')
-            let ret1 = deepClone(this.submitList)
-            let ret2 = deepClone(this.form)
-            ret1.push(ret2)
-            this.previewList = ret1
-            this.showConfirm = true;
-        },
-
-        handleCancel() {
-            this.showConfirm = false;
-        },
-
-        /**
-         * 确认操作
-         */
-        handleConfirm() {
-            this.isSubmiting = true;
-            this.handleSubmit(this.previewList)
-                .then((res) => {
-                    this.isSubmiting = false;
-                    Toast("操作成功");
-                    // 可能跳转到主页
-                    // this.closePage.call(this)
-                    this.$router.replace({
-                        name: 'home'
-                    })
-                })
-                .catch((err) => {
-                    this.isSubmiting = false;
-                    console.log(err);
-                    Toast(err.message || "操作失败")
-                });
-        },
-
-        doAction(action, options) {
-            let actionStrategies = {
-                /**
-                 * 进行检查
-                 */
-                doCheck: async function () {
-                    if (this.loading.doCheck) return;
-
-                    // 表单验证
-                    let f = this.form;
-                    if (f.location === "") {
-                        this.errorMsg = "请选择检查地点";
-                        this.show.notication = true;
-                        return;
-                    }
-                    if (f.vehiNo === "") {
-                        this.errorMsg = "请选择车牌号";
-                        this.show.notication = true;
-                        return;
-                    }
-
-                    this.loading.doCheck = true;
-                    // // 重置状态
-                    // this.form.isChecking = false;
-
-                    try {
-                        // ...
-                    } catch (error) {
-                        this.loading.doCheck = false;
-                    }
-                },
-
-                /**
-                 * 显示检查项列表
-                 */
-                showFilterList: function (listModeType) {
-                    this.listMode = true;
-                    this.listModeType = listModeType;
-                },
-            };
-            let func = actionStrategies && actionStrategies[action];
-            // 执行策略
-            func && func.call(this, options);
-        },
-
-        handleCheckItemSelect(item) {
-            this.show.typeFilter = false
-            this.form.source = item;
-            this.form.type = item.briefCont;
-            this.form.id = item.id;
-            // 6 + 2的检查项要设置必填属性
-            this.form.required = item.highRank === 2
-        },
-
-        /**
-         * 处理车辆输入
-         */
-        handleTypeInput() {
-            this.show.typeSearchPanel = true
-        }
+    addFile (file) {
+      this.form.fileList.push(file)
     },
 
-    created() {
-        let q = this.$route.query
-        // 运单号
-        this.deliNo = q.deliNo;
-        // 检查类型
-        this.__checkType__ = q.type
-        // 节流优化
-        this.debounceHandleTypeInput = this.$debounce(this.handleTypeInput, 1000);
-        this.debounceEndCheck = this.$debounce(this.handleEndCheck, 250);
-        this.debounceCancel = this.$debounce(this.handleCancel, 250);
-        this.debounceConfirm = this.$debounce(this.handleConfirm, 250);
-        this.debounceContinueCheck = this.$debounce(this.handleContinueCheck, 250);
+    handlePhotoUploadSuccess (data) {
+      this.addFile(data.file)
+    },
+
+    handleVideoUploadSuccess (data) {
+      this.addFile(data.file)
+    },
+
+    handleFileUploadSuccess (data) {
+      this.addFile(data.file)
+    },
+
+    /**
+         * 验证当前表单项是否有效
+         */
+    isCurrentFormItemValidate () {
+      let f = this.form
+      let type = f.type.trim()
+      if (type === '') {
+        Toast('请选择违规内容')
+        return false
+      }
+      if (f.id === null) {
+        Toast('请选择违规内容')
+        return false
+      }
+      if (f.required) {
+        let remark = f.remark.trim()
+        if (remark === '') {
+          Toast('请输入违规描述')
+          return false
+        }
+        let fileList = f.fileList
+        if (fileList.length === 0) {
+          Toast('请上传现场记录的附件')
+          return false
+        }
+      }
+      return true
+    },
+
+    /**
+         * 继续检查
+         */
+    handleContinueCheck () {
+      if (!this.isCurrentFormItemValidate()) {
+        return
+      }
+      // 深复制数据
+      this.submitList.push(deepClone(this.form))
+      this.form = checkItemFactory()
+      return true
+    },
+
+    /**
+         * 删除文件处理
+         */
+    handleFileItemRemove (item) {
+      this.$toast('正在删除...')
+      debugger
+      let ossId = item.ossId
+      let list = this.form.fileList
+      let $index = list.indexOf(item)
+      list.splice($index, 1)
+      // OSS删除
+      delOss(ossId).then((res) => {
+        if (res.code === 200) {
+          this.$toast('删除成功')
+          return
+        }
+        this.$toast('删除失败')
+      })
+    },
+
+    handleIconItemClicked (type) {
+      console.log('log type:')
+      console.log(type)
+    },
+
+    handleEndCheck (state) {
+      let submitList = this.submitList
+      let isListEmpty = submitList.length === 0
+      let type = this.form.type
+      if (isListEmpty && type === '') {
+        let __checkType__ = this.__checkType__
+
+        // 以下策略只处理属地检查
+        if (__checkType__ !== 'dep') {
+          this.showRequirementActionSheet = true
+          return
+        }
+
+        console.log('策略1')
+        function beforeClose (action, done) {
+          if (action === 'confirm') {
+            this.handleSubmit([])
+              .then((res) => {
+                Toast('操作成功')
+                done()
+                this.$router.replace({
+                  name: 'home'
+                })
+              })
+              .catch((err) => {
+                console.log(err)
+                Toast(err.message || '操作失败')
+                done()
+              })
+          } else {
+            done()
+          }
+        }
+        Dialog.confirm({
+          message: '当前检查一切正常，是否确认?',
+          beforeClose: beforeClose.bind(this)
+        })
+        return
+      }
+      if (isListEmpty && type !== '' && !this.isCurrentFormItemValidate()) {
+        console.log('策略2')
+        return
+      }
+      if (!isListEmpty && type === '') {
+        console.log('策略3')
+        let ret1 = deepClone(this.submitList)
+        this.previewList = ret1
+        this.showConfirm = true
+        return
+      }
+      if (!isListEmpty && type !== '' && !this.isCurrentFormItemValidate()) {
+        console.log('策略4')
+        return
+      }
+      console.log('策略5')
+      let ret1 = deepClone(this.submitList)
+      let ret2 = deepClone(this.form)
+      ret1.push(ret2)
+      this.previewList = ret1
+      this.showConfirm = true
+    },
+
+    handleCancel () {
+      this.showConfirm = false
+    },
+
+    /**
+         * 确认操作
+         */
+    handleConfirm () {
+      this.isSubmiting = true
+      this.handleSubmit(this.previewList)
+        .then((res) => {
+          this.isSubmiting = false
+          Toast('操作成功')
+          // 可能跳转到主页
+          // this.closePage.call(this)
+          this.$router.replace({
+            name: 'home'
+          })
+        })
+        .catch((err) => {
+          this.isSubmiting = false
+          console.log(err)
+          Toast(err.message || '操作失败')
+        })
+    },
+
+    doAction (action, options) {
+      let actionStrategies = {
+        /**
+                 * 进行检查
+                 */
+        doCheck: async function () {
+          if (this.loading.doCheck) return
+
+          // 表单验证
+          let f = this.form
+          if (f.location === '') {
+            this.errorMsg = '请选择检查地点'
+            this.show.notication = true
+            return
+          }
+          if (f.vehiNo === '') {
+            this.errorMsg = '请选择车牌号'
+            this.show.notication = true
+            return
+          }
+
+          this.loading.doCheck = true
+          // // 重置状态
+          // this.form.isChecking = false;
+
+          try {
+            // ...
+          } catch (error) {
+            this.loading.doCheck = false
+          }
+        },
+
+        /**
+                 * 显示检查项列表
+                 */
+        showFilterList: function (listModeType) {
+          this.listMode = true
+          this.listModeType = listModeType
+        }
+      }
+      let func = actionStrategies && actionStrategies[action]
+      // 执行策略
+      func && func.call(this, options)
+    },
+
+    handleCheckItemSelect (item) {
+      this.show.typeFilter = false
+      this.form.source = item
+      this.form.type = item.briefCont
+      this.form.id = item.id
+      // 6 + 2的检查项要设置必填属性
+      this.form.required = item.highRank === 2
+    },
+
+    /**
+         * 处理车辆输入
+         */
+    handleTypeInput () {
+      this.show.typeSearchPanel = true
     }
-};
+  },
+
+  created () {
+    let q = this.$route.query
+    // 运单号
+    this.deliNo = q.deliNo
+    // 检查类型
+    this.__checkType__ = q.type
+    // 节流优化
+    this.debounceHandleTypeInput = this.$debounce(this.handleTypeInput, 1000)
+    this.debounceEndCheck = this.$debounce(this.handleEndCheck, 250)
+    this.debounceCancel = this.$debounce(this.handleCancel, 250)
+    this.debounceConfirm = this.$debounce(this.handleConfirm, 250)
+    this.debounceContinueCheck = this.$debounce(this.handleContinueCheck, 250)
+  }
+}
 </script>
-  
+
 <style lang="scss" scoped>
 $dropdown-bg: #f8f9fb;
 

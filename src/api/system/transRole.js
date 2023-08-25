@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
 // 查询百规列表
-export function listTransRole(query) {
+export function listTransRole(query = {}) {
   return request({
     url: '/system/transRole/list',
     method: 'get',
-    // params: query
+    params: query
   })
 }
 

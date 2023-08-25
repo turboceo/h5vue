@@ -13,13 +13,19 @@
 </template>
 
 <script>
-import { formatDate, deepClone } from "@/utils/index";
-import { addRealMonitor } from "@/api/system/realMonitor";
+import { formatDate, deepClone } from '@/utils/index'
+import { addRealMonitor } from '@/api/system/realMonitor'
+
+import { mapState } from 'vuex'
+
+import CheckItem from './CheckItem/index.vue'
+
+import { Toast } from 'vant'
 
 let SubmitMixin = {
   methods: {
-    handleSubmit() {
-      let inspdstartTime = formatDate(Date.now());
+    handleSubmit () {
+      let inspdstartTime = formatDate(Date.now())
       let tmsRealMoniterItemAdapter = (item) => {
         return {
           // 本次检查结果
@@ -29,51 +35,44 @@ let SubmitMixin = {
           // 百规id
           tranroleId: item.id,
           // 记录内容描述
-          inspdMemo: item.remark || "",
+          inspdMemo: item.remark || '',
           // 现场图片
-          evidPic: item.fileList.map((file) => file.url).join(",") || "",
+          evidPic: item.fileList.map((file) => file.url).join(',') || '',
           // 所在地点
-          locaPlace: "",
-        };
-      };
+          locaPlace: ''
+        }
+      }
 
       let data = {
         // 运单Id
         waybillId: this.deliNo,
         // 结果列表
-        tmsRealMoniterDetailsList: this.list.map(tmsRealMoniterItemAdapter),
-      };
+        tmsRealMoniterDetailsList: this.list.map(tmsRealMoniterItemAdapter)
+      }
 
-      this.isSubmiting = true;
+      this.isSubmiting = true
 
       addRealMonitor(data)
         .then((res) => {
-          this.isSubmiting = false;
-          console.log(res);
-          this.$toast.success("操作成功");
+          this.isSubmiting = false
+          console.log(res)
+          this.$toast.success('操作成功')
 
           // TODO:
           // 跳转到主页
         })
         .catch((err) => {
-          this.isSubmiting = false;
-          console.log(err);
-          this.show.notication = true;
-          this.show.errorMsg = "操作失败";
-        });
-    },
-  },
-};
-
-import { mapState } from "vuex";
-
-import CheckItem from './CheckItem/index.vue'
-
-
-import { Toast } from 'vant'
+          this.isSubmiting = false
+          console.log(err)
+          this.show.notication = true
+          this.show.errorMsg = '操作失败'
+        })
+    }
+  }
+}
 
 export default {
-  name: "ListMode",
+  name: 'ListMode',
 
   props: {
     // 检查项类型，1为必查，0为所有
@@ -86,26 +85,26 @@ export default {
   mixins: [SubmitMixin],
 
   computed: {
-    ...mapState('checklist', ['checkList']),
+    ...mapState('checklist', ['checkList'])
   },
 
   components: {
     CheckItem
   },
 
-  data() {
+  data () {
     return {
       ready: false,
       list: []
-    };
+    }
   },
 
   methods: {
-    handleCancel() {
-      this.$emit("cancel");
+    handleCancel () {
+      this.$emit('cancel')
     },
 
-    handleConfirm() {
+    handleConfirm () {
       // 验证表单
       console.log('Start Validate:::')
       let list = this.list
@@ -115,7 +114,6 @@ export default {
       let isValidateSuccss = list.every(item => {
         let isHighRank = item.highRank === 2
         if (isHighRank && item.remark === '') {
-          debugger
           errMsg = `请输入【${item.briefCont}】违规描述`
           return false
         }
@@ -130,50 +128,40 @@ export default {
         return
       }
       console.log('Validate Success:::')
-      this.handleSubmit();
+      this.handleSubmit()
     },
 
-    doAction(action, options) {
+    doAction (action, options) {
       let actionStrategies = {
         // ...
         // TODO:
         // - 添加策略
-      };
-      let func = actionStrategies && actionStrategies[action];
+      }
+      let func = actionStrategies && actionStrategies[action]
       // 执行策略
-      func && func.call(this, options);
-    },
+      func && func.call(this, options)
+    }
   },
 
-  created() {
-    this.deliNo = this.$route.query.deliNo;
+  created () {
+    this.deliNo = this.$route.query.deliNo
     console.log(`DeliNo: ${this.deliNo}`)
-    this.debounceCancel = this.$debounce(this.handleCancel, 250);
-    this.debounceConfirm = this.$debounce(this.handleConfirm, 250);
+    this.debounceCancel = this.$debounce(this.handleCancel, 250)
+    this.debounceConfirm = this.$debounce(this.handleConfirm, 250)
     this.$nextTick(() => {
-      this.ready = true;
-    });
+      this.ready = true
+    })
 
     let clonedlist = deepClone(this.checkList)
     if (this.type === 1) {
       clonedlist = clonedlist.filter(item => item.highRank === 2)
     }
     this.list = clonedlist.map(item => {
-
       item.model = 0
-      // - 移除开发环境下的注入逻辑
-      // item.remark = item.highRank === 2 ? 'ajjdajjc' : ''
-      // item.fileList = [
-      //   {
-      //     fileName: 'test.pdf',
-      //     ossId: 1,
-      //     url: 'https://www.baidu.com'
-      //   }
-      // ]
       return item
     })
-  },
-};
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -1,25 +1,17 @@
-import { mapActions } from "vuex";
-
-let isDev = process.env.NODE_ENV === 'development'
+import { mapActions } from 'vuex'
 
 let CheckListMixin = {
-    methods: {
-        ...mapActions({
-            updateCheckListAsync: 'checklist/updateCheckListAsync'
-        }),
-    },
+  methods: {
+    ...mapActions({
+      updateCheckListAsync: 'checklist/updateCheckListAsync'
+    })
+  },
 
-    created() {
-        this.updateCheckListAsync({
-            q: 'test'
-        }).then(res => {
-            // TODO:
-            // - Remove
-            // if (isDev) {
-            //     this.listMode = true
-            // }
-        })
-    }
+  created () {
+    let payload = this.$route.query
+    this.updateCheckListAsync(payload).then(res => {
+    })
+  }
 }
 
 export default CheckListMixin

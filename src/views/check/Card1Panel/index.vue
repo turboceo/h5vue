@@ -9,7 +9,7 @@
             <section class="check-card">
                 <van-field label-width="8em" disabled :value="user.user.nickName" label="检查人" placeholder="" />
 
-                <van-field :required="false" v-show="shouldShow" label-width="8em" :value="'test'" label="动态静态检查">
+                <van-field :required="false" v-show="sgsType === 1" label-width="8em" :value="'test'" label="动态静态检查">
                     <template #input>
                         <van-radio-group v-model="sgsForm.dsMonitoring" direction="horizontal">
                             <van-radio :name="1">动态</van-radio>
@@ -18,13 +18,13 @@
                     </template>
                 </van-field>
 
-                <van-field v-show="!shouldShow" label-width="8em" label="分析影像时长(h)">
+                <van-field v-show="sgsType === 2" label-width="8em" label="分析影像时长(h)">
                     <template #input>
                         <van-stepper v-model="sgsForm.analysisTime" min="0" step="0.5" :decimal-length="1" />
                     </template>
                 </van-field>
 
-                <van-field v-show="!shouldShow" label-width="8em" label="SD卡状态">
+                <van-field v-show="sgsType === 2" label-width="8em" label="SD卡状态">
                     <template #input>
                         <van-radio-group v-model="sgsForm.sdState">
                             <van-radio class="van-field--radio" :name="1">卡内数据异常</van-radio>
@@ -35,25 +35,25 @@
                     </template>
                 </van-field>
 
-                <!-- 1. 防御性驾驶 -->
-                <header class="check-card--header">
-                    <span class="check-card--header---indicator"></span>防御性驾驶
-                </header>
-                <van-field label-width="8em" :required="false" readonly clickable name="picker"
-                    :value="defensiveDrivingRuleDesc" label="防御性驾驶细则" placeholder="请选择" @click="t('sgsRuleList', true)" />
+                <template v-if="sgsType !== 3">
+                    <!-- 1. 防御性驾驶 -->
+                    <header class="check-card--header">
+                        <span class="check-card--header---indicator"></span>防御性驾驶
+                    </header>
+                    <van-field label-width="8em" :required="false" readonly clickable name="picker"
+                        :value="defensiveDrivingRuleDesc" label="防御性驾驶细则" placeholder="请选择"
+                        @click="t('sgsRuleList', true)" />
+                    <van-field v-show="!sgsForm.defensiveDrivingRules" :required="false" label-width="8em" clearable
+                        v-model="other" label="其它细则" placeholder="请输入" />
 
-                <!-- TODO: 看看怎么处理 -->
-                <!-- TODO: 调整为computed属性 -->
-                <van-field v-show="!sgsForm.defensiveDrivingRules" :required="false" label-width="8em" clearable
-                    v-model="other" label="其它细则" placeholder="请输入" />
-
-                <van-field :required="false" label-width="8em" label="防御性驾驶附件" placeholder="请输入">
-                    <template #input>
-                        <PdfUploader name="defensiveDriving" @upload-success="handleFileUploadSuccess"
-                            style="margin-top: -8px;">
-                        </PdfUploader>
-                    </template>
-                </van-field>
+                    <van-field :required="false" label-width="8em" label="防御性驾驶附件" placeholder="请输入">
+                        <template #input>
+                            <PdfUploader name="defensiveDriving" @upload-success="handleFileUploadSuccess"
+                                style="margin-top: -8px;">
+                            </PdfUploader>
+                        </template>
+                    </van-field>
+                </template>
 
                 <!-- 附件列表 -->
                 <div class="file--list" style="padding: 10px 16px;">
@@ -66,7 +66,7 @@
                 </div>
 
                 <!-- 巡检的情况下要显示 -->
-                <div v-show="shouldShow">
+                <div v-show="sgsType === 1">
                     <!-- 2. 酒精测试 -->
                     <header class="check-card--header">
                         <span class="check-card--header---indicator"></span>酒精测试
@@ -180,6 +180,20 @@
                         </div>
                     </div>
                 </div>
+
+                <template v-if="sgsType === 3">
+                    <van-field :required="false" label-width="4em" clearable v-model="sgsForm.alcoholResult" label="检查周期"
+                        placeholder="">
+                        <template #input>
+                            <van-radio-group v-model="sgsForm.ruleTimeType" direction="horizontal">
+                                <van-radio class="van-field--radio" :name="1">日检</van-radio>
+                                <van-radio class="van-field--radio" :name="2">周检</van-radio>
+                                <van-radio class="van-field--radio" :name="3">月检</van-radio>
+                            </van-radio-group>
+                        </template>
+                    </van-field>
+                </template>
+
                 <!-- +++++++++++++ 弹窗相关的内容区域 +++++++++++++++++ -->
 
                 <!-- SGS规则弹窗 -->
@@ -193,180 +207,179 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-import { delOss } from "@/api/system/oss";
+import { mapState } from 'vuex'
+import { delOss } from '@/api/system/oss'
 
 import PdfUploader from './uploader.vue'
-import { Radio, RadioGroup, Picker, Stepper, Skeleton, Empty } from 'vant';
+import { Radio, RadioGroup, Picker, Stepper, Skeleton, Empty } from 'vant'
 
 import { listSgsRule } from '@/api/system/sgsRule'
 
 export default {
-    // 巡检面板
-    name: "Card1Panel",
+  // 巡检面板
+  name: 'Card1Panel',
 
-    components: {
-        PdfUploader,
-        [Picker.name]: Picker,
-        [Radio.name]: Radio,
-        [RadioGroup.name]: RadioGroup,
-        [Stepper.name]: Stepper,
-        [Skeleton.name]: Skeleton,
-        [Empty.name]: Empty
+  components: {
+    PdfUploader,
+    [Picker.name]: Picker,
+    [Radio.name]: Radio,
+    [RadioGroup.name]: RadioGroup,
+    [Stepper.name]: Stepper,
+    [Skeleton.name]: Skeleton,
+    [Empty.name]: Empty
+  },
+
+  props: {
+    // sgs巡检类别，1 视频 2巡检
+    sgsType: {
+      type: Number,
+      default: 1
     },
 
-    props: {
-        // sgs巡检类别，1 视频 2巡检
-        sgsType: {
-            type: Number,
-            default: 1
-        },
+    sgsForm: {
+      type: Object,
+      default () {
+        return {}
+      }
+    }
+  },
 
-        sgsForm: {
-            type: Object,
-            default() {
-                return {}
-            }
-        }
-    },
+  computed: {
+    ...mapState('user', ['user']),
+    shouldShow () {
+      // TODO:
+      // 根据检查类型来判断
+      return this.sgsType === 1
+    }
+  },
 
-    computed: {
-        ...mapState('user', ['user']),
-        shouldShow() {
-            // TODO:
-            // 根据检查类型来判断
-            return this.sgsType === 1
-        },
-    },
+  data () {
+    return {
+      isLoadingSgsRuleList: false,
+      isLoadingSgsRuleListError: false,
 
-    data() {
-        return {
-            isLoadingSgsRuleList: false,
-            isLoadingSgsRuleListError: false,
+      // 防御性Item对应的说明
+      defensiveDrivingRuleDesc: '',
 
-            // 防御性Item对应的说明
-            defensiveDrivingRuleDesc: '',
+      other: '',
 
-            other: '',
+      // SGS规则列表
+      sgsRuleList: [],
 
-            // SGS规则列表
-            sgsRuleList: [],
+      showPicker: {
+        sgsRuleList: false
+      },
 
-            showPicker: {
-                sgsRuleList: false
-            },
+      uploader: [{ url: 'https://img01.yzcdn.cn/vant/leaf.jpg' }]
+    }
+  },
 
-            uploader: [{ url: 'https://img01.yzcdn.cn/vant/leaf.jpg' }],
-        }
-    },
-
-    methods: {
-        /**
+  methods: {
+    /**
          * 封装Picker显示&隐藏的方法
          */
-        t(prop, isShow) {
-            this.showPicker[prop] = isShow
-        },
+    t (prop, isShow) {
+      this.showPicker[prop] = isShow
+    },
 
-        /**
+    /**
          * 删除文件处理
          */
-        handleFileItemRemove(item, $index, strategy) {
-            debugger
-            this.$toast("正在删除...");
-            let ossId = item.ossId;
-            if (strategy === 'defensiveDriving') {
-                this.sgsForm.defensiveDrivingRulesFile.splice($index, 1);
-            }
-            if (strategy === 'alcohol') {
-                this.sgsForm.alcoholFile.splice($index, 1);
-            }
-            if (strategy === 'gps') {
-                this.sgsForm.gpsFile.splice($index, 1);
-            }
-            if (strategy === 'narcotics') {
-                this.sgsForm.narcoticsFiles.splice($index, 1);
-            }
+    handleFileItemRemove (item, $index, strategy) {
+      this.$toast('正在删除...')
+      let ossId = item.ossId
+      if (strategy === 'defensiveDriving') {
+        this.sgsForm.defensiveDrivingRulesFile.splice($index, 1)
+      }
+      if (strategy === 'alcohol') {
+        this.sgsForm.alcoholFile.splice($index, 1)
+      }
+      if (strategy === 'gps') {
+        this.sgsForm.gpsFile.splice($index, 1)
+      }
+      if (strategy === 'narcotics') {
+        this.sgsForm.narcoticsFiles.splice($index, 1)
+      }
 
-            if (strategy === 'speed') {
-                this.sgsForm.speedingFiles.splice($index, 1);
-            }
+      if (strategy === 'speed') {
+        this.sgsForm.speedingFiles.splice($index, 1)
+      }
 
-            // item.fileList.splice($index, 1);
-            delOss(ossId).then((res) => {
-                if (res.code === 200) {
-                    this.$toast("删除成功");
-                    return;
-                }
-                this.$toast("删除失败");
-            });
-        },
+      // item.fileList.splice($index, 1);
+      delOss(ossId).then((res) => {
+        if (res.code === 200) {
+          this.$toast('删除成功')
+          return
+        }
+        this.$toast('删除失败')
+      })
+    },
 
-        /**
+    /**
          * 处理文件上传成功
          * @param {Object} payload 事件回调payload
          */
-        handleFileUploadSuccess(payload) {
-            let { strategy, file } = payload
-            if (strategy === 'defensiveDriving') {
-                this.sgsForm.defensiveDrivingRulesFile.push(file)
-                return
-            }
+    handleFileUploadSuccess (payload) {
+      let { strategy, file } = payload
+      if (strategy === 'defensiveDriving') {
+        this.sgsForm.defensiveDrivingRulesFile.push(file)
+        return
+      }
 
-            if (strategy === 'alcohol') {
-                this.sgsForm.alcoholFile.push(file)
-                return
-            }
+      if (strategy === 'alcohol') {
+        this.sgsForm.alcoholFile.push(file)
+        return
+      }
 
-            if (strategy === 'gps') {
-                this.sgsForm.gpsFile.push(file)
-                return
-            }
+      if (strategy === 'gps') {
+        this.sgsForm.gpsFile.push(file)
+        return
+      }
 
-            if (strategy === 'narcotics') {
-                this.sgsForm.narcoticsFiles.push(file)
-                return
-            }
+      if (strategy === 'narcotics') {
+        this.sgsForm.narcoticsFiles.push(file)
+        return
+      }
 
-            if (strategy === 'speed') {
-                this.sgsForm.speedingFiles.push(file)
-                return
-            }
-        },
-
-        onConfirm(item) {
-            this.defensiveDrivingRuleDesc = item.sgsRule
-            this.sgsForm.defensiveDrivingRules = item.id;
-            this.t('sgsRuleList', false)
-        },
-
-        /**
-         * 加载Sgs规则列表
-         */
-        getSgsRuleList() {
-            this.isLoadingSgsRuleList = true
-            listSgsRule().then(res => {
-                this.sgsRuleList = res.rows
-                this.isLoadingSgsRuleList = false
-                this.isLoadingSgsRuleListError = false
-            }).catch(err => {
-                this.isLoadingSgsRuleList = false
-                this.isLoadingSgsRuleListError = true
-                console.log('log sgsRuleList error:')
-                console.log(err)
-            })
-        }
+      if (strategy === 'speed') {
+        this.sgsForm.speedingFiles.push(file)
+      }
     },
 
-    created() {
-        this.getSgsRuleList();
+    onConfirm (item) {
+      this.defensiveDrivingRuleDesc = item.sgsRule
+      this.sgsForm.defensiveDrivingRules = item.id
+      this.t('sgsRuleList', false)
+    },
+
+    /**
+         * 加载Sgs规则列表
+         */
+    getSgsRuleList () {
+      this.isLoadingSgsRuleList = true
+      listSgsRule().then(res => {
+        this.sgsRuleList = res.rows
+        this.isLoadingSgsRuleList = false
+        this.isLoadingSgsRuleListError = false
+      }).catch(err => {
+        this.isLoadingSgsRuleList = false
+        this.isLoadingSgsRuleListError = true
+        console.log('log sgsRuleList error:')
+        console.log(err)
+      })
     }
+  },
+
+  created () {
+    this.getSgsRuleList()
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .van-field--radio {
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .check-card {
