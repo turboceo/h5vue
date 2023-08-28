@@ -1,4 +1,4 @@
-// 相关文档 https://vuex.vuejs.org/zh/api/#subscribeaction
+// 相关文档 https://v3.vuex.vuejs.org/zh/api/#subscribeaction
 const NAMESPACE = '@@loading'
 
 const createLoadingPlugin = ({
