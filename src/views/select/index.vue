@@ -217,8 +217,8 @@ const RequirementMixin = {
         return
       }
 
-      let evidPic = this.requirementFileList.filter(item => item.type == 'photo').map(item => item.url).join(',') || ''
-      let evidVid = this.requirementFileList.filter(item => item.type == 'video').map(item => item.url).join(',') || ''
+      let evidPic = this.requirementFileList.filter(item => item.type === 'photo').map(item => item.url).join(',') || ''
+      let evidVid = this.requirementFileList.filter(item => item.type === 'video').map(item => item.url).join(',') || ''
 
       let waybillId = this.deliNo
 
@@ -241,12 +241,15 @@ const RequirementMixin = {
               name: 'home'
             })
           }).catch(error => {
-            debugger
             // eslint-disable-next-line no-mixed-operators
             Toast(error && error.msg || '操作失败')
           })
         },
 
+        /**
+         * 第三方检查
+         * @param {String} list 
+         */
         sgs: function (list) {
           let tmsSgsMoniterDetails = []
 
