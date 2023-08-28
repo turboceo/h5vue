@@ -6,8 +6,8 @@
                 <van-checkbox style="pointer-events: none;" v-model="item.checked"></van-checkbox>
             </div>
             <div class="dropdown--item__info">
-                <p> <svg-icon class="icon" icon-class="car" />{{ item.vehiNo }}</p>
-                <p>供应商简称: {{ item.splAbrName }}</p>
+                <p> <svg-icon class="icon" icon-class="car" />{{ item.vehiNo || '-' }}</p>
+                <p>供应商简称: {{ item.splAbrName || '-' }}</p>
             </div>
         </li>
     </ul>

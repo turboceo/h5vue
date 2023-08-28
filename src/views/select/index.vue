@@ -225,6 +225,7 @@ const RequirementMixin = {
       let sendStrategies = {
         real: function (list) {
           let tmsRealMoniterDetailsList = []
+
           let data = {
             // 运单Id
             waybillId,
@@ -235,30 +236,33 @@ const RequirementMixin = {
           }
 
           addRealMonitor(data).then(res => {
-            debugger
-            console.log(res)
             this.showRequirementActionSheet = false
             this.$router.replace({
               name: 'home'
             })
           }).catch(error => {
             debugger
+            // eslint-disable-next-line no-mixed-operators
             Toast(error && error.msg || '操作失败')
           })
         },
 
         sgs: function (list) {
           let tmsSgsMoniterDetails = []
+
+          // TODO:
+          // - 是否需要增加检查周期的参数
+          let { sgsType } = this.$route.query
+       
           let data = {
             // 运单Id
-            waybillId: this.deliNo,
+            waybillId,
             // 结果列表
             tmsSgsMoniterDetails,
             evidPic,
-            evidVid
+            evidVid,
+            sgsType
           }
-
-          debugger
 
           addSgsMonitor(data).then(res => {
             debugger
@@ -268,7 +272,7 @@ const RequirementMixin = {
               name: 'home'
             })
           }).catch(error => {
-            debugger
+            // eslint-disable-next-line no-mixed-operators
             Toast(error && error.msg || '操作失败')
           })
         }
