@@ -91,4 +91,4 @@ let LocationMixin = {
   }
 }
 
-module.exports = LocationMixin
+export default LocationMixin

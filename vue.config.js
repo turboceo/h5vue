@@ -218,6 +218,9 @@ module.exports = {
       //     paths: glob.sync(`${PATHS.src}/**/*`, { nodir: true })
       //   })
       // )
+
+      // TODO:
+      // - 暂时不使用此插件，否则会引起异常
       // config.optimization.minimizer([
       //   new UglifyjsWebpackPlugin({
       //     // 生产环境推荐关闭 sourcemap 防止源码泄漏
