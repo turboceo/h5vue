@@ -14,12 +14,15 @@ import defaultSetting from './settings'
 export default {
   name: 'app',
   computed: {
-    transitionName() {
+    transitionName () {
       if (defaultSetting.needPageTrans) {
         return this.$store.state.direction
       }
       return ''
     }
+  },
+  created () {
+    console.log(process.env.NODE_ENV)
   }
 }
 </script>
