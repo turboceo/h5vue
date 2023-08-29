@@ -177,7 +177,7 @@ module.exports = {
       config.optimization.runtimeChunk('single')
     })
     if (IS_PRODUCTION) {
-      config.plugin('analyzer').use(BundleAnalyzerPlugin)
+      // config.plugin('analyzer').use(BundleAnalyzerPlugin)
       config.plugin('html').tap(args => {
         args[0].cdn = cdn
         return args
@@ -198,17 +198,17 @@ module.exports = {
           ]
         }
       ])
-      // gzip需要nginx进行配合
-      config
-        .plugin('compression')
-        .use(CompressionWebpackPlugin)
-        .tap(() => [
-          {
-            test: /\.js$|\.html$|\.css/, // 匹配文件名
-            threshold: 10240, // 超过10k进行压缩
-            deleteOriginalAssets: false // 是否删除源文件
-          }
-        ])
+      // // gzip需要nginx进行配合
+      // config
+      //   .plugin('compression')
+      //   .use(CompressionWebpackPlugin)
+      //   .tap(() => [
+      //     {
+      //       test: /\.js$|\.html$|\.css/, // 匹配文件名
+      //       threshold: 10240, // 超过10k进行压缩
+      //       deleteOriginalAssets: false // 是否删除源文件
+      //     }
+      //   ])
 
       // css Tree Thaking TODO:: 发现build之后导致样式消失
       // config.plugin('purecss').use(
@@ -216,7 +216,6 @@ module.exports = {
       //     paths: glob.sync(`${PATHS.src}/**/*`, { nodir: true })
       //   })
       // )
-      
       config.optimization.minimizer([
         new UglifyjsWebpackPlugin({
           // 生产环境推荐关闭 sourcemap 防止源码泄漏
