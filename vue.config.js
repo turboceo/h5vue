@@ -93,6 +93,7 @@ module.exports = {
       }
     }
   }),
+
   chainWebpack (config) {
     config.plugins.delete('preload') // TODO: need test
     config.plugins.delete('prefetch') // TODO: need test
@@ -188,16 +189,17 @@ module.exports = {
         return args
       })
 
-      // // 多线程
-      // config.plugin('HappyPack').use(HappyPack, [
-      //   {
-      //     loaders: [
-      //       {
-      //         loader: 'babel-loader?cacheDirectory=true'
-      //       }
-      //     ]
-      //   }
-      // ])
+      // 多线程
+      config.plugin('HappyPack').use(HappyPack, [
+        {
+          loaders: [
+            {
+              loader: 'babel-loader?cacheDirectory=true'
+            }
+          ]
+        }
+      ])
+
       // // gzip需要nginx进行配合
       // config
       //   .plugin('compression')
@@ -216,21 +218,20 @@ module.exports = {
       //     paths: glob.sync(`${PATHS.src}/**/*`, { nodir: true })
       //   })
       // )
-      
-      config.optimization.minimizer([
-        new UglifyjsWebpackPlugin({
-          // 生产环境推荐关闭 sourcemap 防止源码泄漏
-          // 服务端通过前端发送的行列，根据 sourcemap 转为源文件位置
-          // sourceMap: true,
-          uglifyOptions: {
-            warnings: false,
-            compress: {
-              drop_console: true,
-              drop_debugger: true
-            }
-          }
-        })
-      ])
+      // config.optimization.minimizer([
+      //   new UglifyjsWebpackPlugin({
+      //     // 生产环境推荐关闭 sourcemap 防止源码泄漏
+      //     // 服务端通过前端发送的行列，根据 sourcemap 转为源文件位置
+      //     // sourceMap: true,
+      //     uglifyOptions: {
+      //       warnings: false,
+      //       compress: {
+      //         drop_console: true,
+      //         drop_debugger: true
+      //       }
+      //     }
+      //   })
+      // ])
     }
   },
   css: {
