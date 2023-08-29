@@ -16,17 +16,6 @@ import DrawerSearch from 'components/DrawerSearch'
 
 import debounce from 'lodash/debounce'
 
-// import * as fundebug from "fundebug-javascript";
-// import FundebugVue from "fundebug-vue";
-
-// let isDev = process.env.NODE_ENV === 'development'
-// if(!isDev) {
-//   fundebug.init({
-//     apikey: "fb11642bf4ece2267df6e10ee88d1d15e8e2d1e29a71bb04b8fef3918093861d"
-//   })
-//   new FundebugVue(fundebug).installVueErrorHandler(Vue); // Vue 2.x
-// }
-
 Vue.use(DirectiveInstall)
 
 Vue.use(Row)
