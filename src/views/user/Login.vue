@@ -100,10 +100,10 @@ export default {
   },
 
   created () {
-    // if (process.env.NODE_ENV === 'development') {
-    //   this.username = 'admin@pyzl'
-    //   this.password = '123456'
-    // }
+    if (process.env.NODE_ENV === 'development') {
+      this.username = 'admin@pyzl'
+      this.password = '123456'
+    }
     // 节流优化
     this.debounceHandleLogin = debounce(this.handleLogin, 500)
     let q = this.$route.query

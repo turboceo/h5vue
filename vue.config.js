@@ -188,16 +188,16 @@ module.exports = {
         return args
       })
 
-      // 多线程
-      config.plugin('HappyPack').use(HappyPack, [
-        {
-          loaders: [
-            {
-              loader: 'babel-loader?cacheDirectory=true'
-            }
-          ]
-        }
-      ])
+      // // 多线程
+      // config.plugin('HappyPack').use(HappyPack, [
+      //   {
+      //     loaders: [
+      //       {
+      //         loader: 'babel-loader?cacheDirectory=true'
+      //       }
+      //     ]
+      //   }
+      // ])
       // // gzip需要nginx进行配合
       // config
       //   .plugin('compression')
@@ -216,6 +216,7 @@ module.exports = {
       //     paths: glob.sync(`${PATHS.src}/**/*`, { nodir: true })
       //   })
       // )
+      
       config.optimization.minimizer([
         new UglifyjsWebpackPlugin({
           // 生产环境推荐关闭 sourcemap 防止源码泄漏
