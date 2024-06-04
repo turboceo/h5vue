@@ -1,60 +1,60 @@
-const path = require('path')
-const glob = require('glob')
-const CompressionWebpackPlugin = require('compression-webpack-plugin')
-const UglifyjsWebpackPlugin = require('uglifyjs-webpack-plugin')
-const HappyPack = require('happypack')
-const PurgecssPlugin = require('purgecss-webpack-plugin')
-const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
-const port = process.env.port || process.env.npm_config_port || 8888
-const cdnDomian = '/' // cdn域名，如果有cdn修改成对应的cdn
-const name = 'H5Vue' // page title
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
+const path = require("path");
+const glob = require("glob");
+const CompressionWebpackPlugin = require("compression-webpack-plugin");
+const UglifyjsWebpackPlugin = require("uglifyjs-webpack-plugin");
+const HappyPack = require("happypack");
+const PurgecssPlugin = require("purgecss-webpack-plugin");
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const port = process.env.port || process.env.npm_config_port || 8888;
+const cdnDomian = "/"; // cdn域名，如果有cdn修改成对应的cdn
+const name = "H5Vue"; // page title
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const cdn = {
   css: [],
   js: [
-    'https://cdn.bootcss.com/vue/2.6.10/vue.min.js',
-    'https://cdn.bootcss.com/vue-router/3.0.3/vue-router.min.js',
-    'https://cdn.bootcss.com/vuex/3.1.0/vuex.min.js',
-    'https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js',
-    'https://cdn.bootcss.com/js-cookie/2.2.1/js.cookie.min.js'
+    "https://cdn.bootcss.com/vue/2.6.10/vue.min.js",
+    "https://cdn.bootcss.com/vue-router/3.0.3/vue-router.min.js",
+    "https://cdn.bootcss.com/vuex/3.1.0/vuex.min.js",
+    "https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js",
+    "https://cdn.bootcss.com/js-cookie/2.2.1/js.cookie.min.js"
   ]
-}
+};
 
 if (IS_PRODUCTION) {
   cdn.js = [
-    'vendors/vue.min.js',
-    'vendors/vue-router.min.js',
-    'vendors/vuex.min.js',
-    'vendors/axios.min.js',
-    'vendors/js.cookie.min.js'
-  ]
+    "vendors/vue.min.js",
+    "vendors/vue-router.min.js",
+    "vendors/vuex.min.js",
+    "vendors/axios.min.js",
+    "vendors/js.cookie.min.js"
+  ];
 }
 
 const externals = {
-  vue: 'Vue',
-  'vue-router': 'VueRouter',
-  vuex: 'Vuex',
-  axios: 'axios',
-  'js-cookie': 'Cookies'
-}
+  vue: "Vue",
+  "vue-router": "VueRouter",
+  vuex: "Vuex",
+  axios: "axios",
+  "js-cookie": "Cookies"
+};
 
 const PATHS = {
-  src: path.join(__dirname, 'src')
-}
+  src: path.join(__dirname, "src")
+};
 
 // 记录打包速度
-const smp = new SpeedMeasurePlugin()
+const smp = new SpeedMeasurePlugin();
 
-function resolve (dir) {
-  return path.join(__dirname, dir)
+function resolve(dir) {
+  return path.join(__dirname, dir);
 }
 
 module.exports = {
-  publicPath: IS_PRODUCTION ? cdnDomian : './',
-  outputDir: 'dist',
-  assetsDir: 'static',
-  lintOnSave: process.env.NODE_ENV === 'development',
+  publicPath: IS_PRODUCTION ? cdnDomian : "./",
+  outputDir: "dist",
+  assetsDir: "static",
+  lintOnSave: process.env.NODE_ENV === "development",
   productionSourceMap: false,
   devServer: {
     port: port,
@@ -67,15 +67,14 @@ module.exports = {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
-        // target: `http://39.108.133.107:8080`,
-        target: `http://192.168.3.94:8080`,
+        target: `http://wxapp.51yunmai.com:8096/prod-api`,
         changeOrigin: true,
         pathRewrite: {
-          ['^' + process.env.VUE_APP_BASE_API]: ''
+          ["^" + process.env.VUE_APP_BASE_API]: ""
         }
       }
     },
-    after: require('./mock/mock-server.js')
+    after: require("./mock/mock-server.js")
   },
   configureWebpack: smp.wrap({
     // provide the app's title in webpack's name field, so that
@@ -83,48 +82,48 @@ module.exports = {
     name: name,
     resolve: {
       alias: {
-        '@': resolve('src'), // 主目录
-        views: resolve('src/views'), // 页面
-        components: resolve('src/components'), // 组件
-        api: resolve('src/api'), // 接口
-        utils: resolve('src/utils'), // 通用功能
-        assets: resolve('src/assets'), // 静态资源
-        style: resolve('src/style') // 通用样式
+        "@": resolve("src"), // 主目录
+        views: resolve("src/views"), // 页面
+        components: resolve("src/components"), // 组件
+        api: resolve("src/api"), // 接口
+        utils: resolve("src/utils"), // 通用功能
+        assets: resolve("src/assets"), // 静态资源
+        style: resolve("src/style") // 通用样式
       }
     }
   }),
 
-  chainWebpack (config) {
-    config.plugins.delete('preload') // TODO: need test
-    config.plugins.delete('prefetch') // TODO: need test
+  chainWebpack(config) {
+    config.plugins.delete("preload"); // TODO: need test
+    config.plugins.delete("prefetch"); // TODO: need test
 
     // set svg-sprite-loader
     config.module
-      .rule('svg')
-      .exclude.add(resolve('src/icons'))
-      .end()
+      .rule("svg")
+      .exclude.add(resolve("src/icons"))
+      .end();
     config.module
-      .rule('icons')
+      .rule("icons")
       .test(/\.svg$/)
-      .include.add(resolve('src/icons'))
+      .include.add(resolve("src/icons"))
       .end()
-      .use('svg-sprite-loader')
-      .loader('svg-sprite-loader')
+      .use("svg-sprite-loader")
+      .loader("svg-sprite-loader")
       .options({
-        symbolId: 'icon-[name]'
+        symbolId: "icon-[name]"
       })
-      .end()
+      .end();
 
     // set preserveWhitespace
     config.module
-      .rule('vue')
-      .use('vue-loader')
-      .loader('vue-loader')
+      .rule("vue")
+      .use("vue-loader")
+      .loader("vue-loader")
       .tap(options => {
-        options.compilerOptions.preserveWhitespace = true
-        return options
+        options.compilerOptions.preserveWhitespace = true;
+        return options;
       })
-      .end()
+      .end();
 
     // 图片压缩
     // config.module
@@ -142,63 +141,63 @@ module.exports = {
 
     config
       // https://webpack.js.org/configuration/devtool/#development
-      .when(process.env.NODE_ENV === 'development', config =>
-        config.devtool('cheap-source-map')
-      )
+      .when(process.env.NODE_ENV === "development", config =>
+        config.devtool("cheap-source-map")
+      );
 
-    config.when(process.env.NODE_ENV !== 'development', config => {
+    config.when(process.env.NODE_ENV !== "development", config => {
       config
-        .plugin('ScriptExtHtmlWebpackPlugin')
-        .after('html')
-        .use('script-ext-html-webpack-plugin', [
+        .plugin("ScriptExtHtmlWebpackPlugin")
+        .after("html")
+        .use("script-ext-html-webpack-plugin", [
           {
             // `runtime` must same as runtimeChunk name. default is `runtime`
             inline: /runtime\..*\.js$/
           }
         ])
-        .end()
+        .end();
       config.optimization.splitChunks({
-        chunks: 'all',
+        chunks: "all",
         cacheGroups: {
           libs: {
-            name: 'chunk-libs',
+            name: "chunk-libs",
             test: /[\\/]node_modules[\\/]/,
             priority: 10,
-            chunks: 'initial' // only package third parties that are initially dependent
+            chunks: "initial" // only package third parties that are initially dependent
           },
           commons: {
-            name: 'chunk-commons',
-            test: resolve('src/components'), // can customize your rules
+            name: "chunk-commons",
+            test: resolve("src/components"), // can customize your rules
             minChunks: 3, //  minimum common number
             priority: 5,
             reuseExistingChunk: true
           }
         }
-      })
-      config.optimization.runtimeChunk('single')
-    })
+      });
+      config.optimization.runtimeChunk("single");
+    });
     if (IS_PRODUCTION) {
       // config.plugin('analyzer').use(BundleAnalyzerPlugin)
-      config.plugin('html').tap(args => {
-        args[0].cdn = cdn
-        return args
-      })
-      config.externals(externals)
-      config.plugin('html').tap(args => {
-        args[0].minify.minifyCSS = true // 压缩html中的css
-        return args
-      })
+      config.plugin("html").tap(args => {
+        args[0].cdn = cdn;
+        return args;
+      });
+      config.externals(externals);
+      config.plugin("html").tap(args => {
+        args[0].minify.minifyCSS = true; // 压缩html中的css
+        return args;
+      });
 
       // 多线程
-      config.plugin('HappyPack').use(HappyPack, [
+      config.plugin("HappyPack").use(HappyPack, [
         {
           loaders: [
             {
-              loader: 'babel-loader?cacheDirectory=true'
+              loader: "babel-loader?cacheDirectory=true"
             }
           ]
         }
-      ])
+      ]);
 
       // // gzip需要nginx进行配合
       // config
@@ -252,4 +251,4 @@ module.exports = {
       }
     }
   }
-}
+};
