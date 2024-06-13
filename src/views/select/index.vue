@@ -1,166 +1,164 @@
 <template>
-    <div class="select--view">
-        <div class="p-15">
-            <template v-if="showConfirm">
-                <CardBox class="fixed--title" :title="'已检出违规项(共' + submitList.length + '条)'" :show-toggler="false"
-                    type="simple">
-                </CardBox>
-                <div class="card--list">
-                    <div class="card--box" v-for="item in previewList" :key="item.id">
-                        <div class="card--row is--header">
-                            编号: {{ item.source.riskLeve }}-{{ item.source.respFor }}
-                        </div>
-                        <div class="card--row">违规内容: {{ item.source.briefCont }}</div>
-                        <div class="card--row">
-                            关注程度: {{ item.source.ranking }}级别-{{ item.source.prioritis }}
-                        </div>
-                        <div class="card--row">是否6+2: {{ item.source.highRank === 2 ? '是' : '否' }}</div>
-                    </div>
+  <div class="select--view">
+    <div class="p-15">
+      <template v-if="showConfirm">
+        <CardBox class="fixed--title" :title="'已检出违规项(共' + submitList.length + '条)'" :show-toggler="false"
+          type="simple">
+        </CardBox>
+        <div class="card--list">
+          <div class="card--box" v-for="item in previewList" :key="item.id">
+            <div class="card--row is--header">
+              编号: {{ item.source.riskLeve }}-{{ item.source.respFor }}
+            </div>
+            <div class="card--row">违规内容: {{ item.source.briefCont }}</div>
+            <div class="card--row">
+              关注程度: {{ item.source.ranking }}级别-{{ item.source.prioritis }}
+            </div>
+            <div class="card--row">是否6+2: {{ item.source.highRank === 2 ? '是' : '否' }}</div>
+          </div>
+        </div>
+      </template>
+
+      <template v-else>
+        <van-action-sheet v-model="showRequirementActionSheet" :close-on-click-overlay="false" title="上传提示">
+          <div class="requirement-popup--container">
+            <van-notice-bar wrapable :scrollable="false" color="#1989fa" background="#ecf9ff" left-icon="info-o">
+              请至少上传一张图片或视频以表明当前检查正常
+            </van-notice-bar>
+            <div class="icon--group is--center is-requirement--popup">
+              <Uploader @upload-success="handleRequirementPhotoUploadSuccess" accept="image/*">
+                <div class="upload--inner">
+                  <van-icon class="icon-item" name="photo" />
+                  <span>拍照</span>
                 </div>
-            </template>
-
-            <template v-else>
-                <van-action-sheet v-model="showRequirementActionSheet" :close-on-click-overlay="false" title="上传提示">
-                    <div class="requirement-popup--container">
-                        <van-notice-bar wrapable :scrollable="false" color="#1989fa" background="#ecf9ff"
-                            left-icon="info-o">
-                            请至少上传一张图片或视频以表明当前检查正常
-                        </van-notice-bar>
-                        <div class="icon--group is--center is-requirement--popup">
-                            <Uploader @upload-success="handleRequirementPhotoUploadSuccess" accept="image/*">
-                                <div class="upload--inner">
-                                    <van-icon class="icon-item" name="photo" />
-                                    <span>拍照</span>
-                                </div>
-                            </Uploader>
-                            <div class=""
-                                style="display: flex; align-items: center; justify-content: center; padding: 10px; padding: 20px; font-size: 20px;">
-                                <span>或</span>
-                            </div>
-                            <!-- <div class="icon--group--spliter"></div> -->
-                            <Uploader @upload-success="handleRequirementVideoUploadSuccess" accept="video/*">
-                                <div class="upload--inner">
-                                    <van-icon class="icon-item" @click="handleIconItemClicked('video')" name="video" />
-                                    <span>录视频</span>
-                                </div>
-                            </Uploader>
-                        </div>
-
-                        <!-- 上传的文件列表 -->
-                        <div class="file--list" style="padding: 10px;">
-                            <div class="flex justify-between file--item items-center my-10"
-                                v-for="item in requirementFileList" :key="item.ossId">
-                                <span class="file--item---title"> {{ item.fileName }}</span>
-                                <van-button class="file--item---action" type="danger" icon="clear" size="mini"
-                                    @click="handleRequirementFileItemRemove(item)">删除</van-button>
-                            </div>
-                        </div>
-
-                        <div class="requirement-popup--action">
-                            <van-button style="width: 40%" type="info" :loading="isHandlingRequirement"
-                                loading-text="正在提交..." :disabled="shouldDisabledRequirementSubmit"
-                                @click="handleRequirementSubmit">提交</van-button>
-                        </div>
-                    </div>
-                </van-action-sheet>
-
-                <CardBox class="is--tiny" title="检查项目" :show-toggler="false" type="simple">
-                    <div class="field--wrapper" style="position: relative">
-                        <van-field v-model="form.type" center readonly clearable required label="违规内容" placeholder="请选择"
-                            @click-input="handleTypeInput">
-                            <template #button>
-                                <van-button :loading="loading.type" @click="handleTypeInput" icon="search" size="small"
-                                    type="info">检索</van-button>
-                            </template>
-                        </van-field>
-                    </div>
-                </CardBox>
-
-                <CardBox title="违规描述" :show-toggler="false" type="simple">
-                    <div class="bg-white deli--container field--border">
-                        <!-- 违规内容 -->
-                        <van-field v-model="form.remark" center clearable :required="form.required" rows="3" autosize
-                            type="textarea" placeholder="请输入描述">
-                        </van-field>
-                    </div>
-                </CardBox>
-                <CardBox title="现场记录的附件" :show-toggler="false" type="simple">
-                    <div class="icon--group">
-                        <Uploader @upload-success="handlePhotoUploadSuccess" accept="image/*">
-                            <div class="upload--inner">
-                                <van-icon class="icon-item" name="photo" />
-                                <span>拍照</span>
-                            </div>
-                        </Uploader>
-                        <Uploader @upload-success="handleVideoUploadSuccess" accept="video/*">
-                            <div class="upload--inner">
-                                <van-icon class="icon-item" @click="handleIconItemClicked('video')" name="video" />
-                                <span>录视频</span>
-                            </div>
-                        </Uploader>
-                        <Uploader @upload-success="handleFileUploadSuccess" accept="*/*">
-                            <div class="upload--inner">
-                                <van-icon class="icon-item" @click="handleIconItemClicked('file')" name="column" />
-                                <span>上传文件</span>
-                            </div>
-                        </Uploader>
-                    </div>
-
-                    <div class="bg-white deli--container">
-                        <!-- 上传的文件列表 -->
-                        <div class="file--list">
-                            <div class="flex justify-between file--item items-center my-10" v-for="item in form.fileList"
-                                :key="item.ossId">
-                                <span class="file--item---title"> {{ item.fileName }}</span>
-                                <van-button class="file--item---action" type="danger" icon="clear" size="mini"
-                                    @click="handleFileItemRemove(item)">删除</van-button>
-                            </div>
-                        </div>
-                    </div>
-                </CardBox>
-
-                <!-- 分割线 -->
-                <van-divider
-                    :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px', marginTop: '40px' }">其它选项</van-divider>
-
-                <van-button @click="doAction('showFilterList', 1)" size="small" type="info" plain block
-                    class="btn--action">展开全部必查项</van-button>
-
-                <van-button @click="doAction('showFilterList', 0)" size="small" type="info" plain block
-                    class="btn--action">展开全部检查项</van-button>
-
-            </template>
-
-            <!-- 底部操作栏 -->
-            <div class="flex justify-center fixed--bottom bg--white p-15 z-2 shadow--top">
-                <template v-if="showConfirm">
-                    <van-button class="fxied--bottom---action" @click="debounceCancel" size="small" type="danger" plain
-                        style="width: 120px" icon="clear">取消</van-button>
-                    <van-button class="fxied--bottom---action" @click="debounceConfirm" size="small" type="info"
-                        icon="checked" style="width: 120px">提交</van-button>
-                </template>
-
-                <template v-else>
-                    <van-button class="fxied--bottom---action" @click="debounceEndCheck('omg')" size="small" type="danger"
-                        plain style="width: 120px" icon="passed">检查结束</van-button>
-                    <van-button class="fxied--bottom---action" @click="debounceContinueCheck" size="small" type="info"
-                        icon="arrow" style="width: 120px">继续检查</van-button>
-                </template>
+              </Uploader>
+              <div class=""
+                style="display: flex; align-items: center; justify-content: center; padding: 10px; padding: 20px; font-size: 20px;">
+                <span>或</span>
+              </div>
+              <!-- <div class="icon--group--spliter"></div> -->
+              <Uploader @upload-success="handleRequirementVideoUploadSuccess" accept="video/*">
+                <div class="upload--inner">
+                  <van-icon class="icon-item" @click="handleIconItemClicked('video')" name="video" />
+                  <span>录视频</span>
+                </div>
+              </Uploader>
             </div>
 
-            <!-- 展开检查项列表模式 -->
-            <transition name="bounce">
-                <ListMode v-if="listMode" :type="listModeType" :list="list" @cancel="listMode = false"></ListMode>
-            </transition>
+            <!-- 上传的文件列表 -->
+            <div class="file--list" style="padding: 10px;">
+              <div class="flex justify-between file--item items-center my-10" v-for="item in requirementFileList"
+                :key="item.ossId">
+                <span class="file--item---title"> {{ item.fileName }}</span>
+                <van-button class="file--item---action" type="danger" icon="clear" size="mini"
+                  @click="handleRequirementFileItemRemove(item)">删除</van-button>
+              </div>
+            </div>
 
-            <!-- 检查项查询面板 -->
-            <transition name="bounce">
-                <TypeSearchPanel v-if="show.typeSearchPanel" @confirm="handleCheckItemSelect"
-                    @close="show.typeSearchPanel = false">
-                </TypeSearchPanel>
-            </transition>
-        </div>
+            <div class="requirement-popup--action">
+              <van-button style="width: 40%" type="info" :loading="isHandlingRequirement" loading-text="正在提交..."
+                :disabled="shouldDisabledRequirementSubmit" @click="handleRequirementSubmit">提交</van-button>
+            </div>
+          </div>
+        </van-action-sheet>
+
+        <CardBox class="is--tiny" title="检查项目" :show-toggler="false" type="simple">
+          <div class="field--wrapper" style="position: relative">
+            <van-field v-model="form.type" center readonly clearable required label="违规内容" placeholder="请选择"
+              @click-input="handleTypeInput">
+              <template #button>
+                <van-button :loading="loading.type" @click="handleTypeInput" icon="search" size="small"
+                  type="info">检索</van-button>
+              </template>
+            </van-field>
+          </div>
+        </CardBox>
+
+        <CardBox title="违规描述" :show-toggler="false" type="simple">
+          <div class="bg-white deli--container field--border">
+            <!-- 违规内容 -->
+            <van-field v-model="form.remark" center clearable :required="form.required" rows="3" autosize
+              type="textarea" placeholder="请输入描述">
+            </van-field>
+          </div>
+        </CardBox>
+        <CardBox title="现场记录的附件" :show-toggler="false" type="simple">
+          <div class="icon--group">
+            <Uploader @upload-success="handlePhotoUploadSuccess" accept="image/*">
+              <div class="upload--inner">
+                <van-icon class="icon-item" name="photo" />
+                <span>拍照</span>
+              </div>
+            </Uploader>
+            <Uploader @upload-success="handleVideoUploadSuccess" accept="video/*">
+              <div class="upload--inner">
+                <van-icon class="icon-item" @click="handleIconItemClicked('video')" name="video" />
+                <span>录视频</span>
+              </div>
+            </Uploader>
+            <Uploader @upload-success="handleFileUploadSuccess" accept="*/*">
+              <div class="upload--inner">
+                <van-icon class="icon-item" @click="handleIconItemClicked('file')" name="column" />
+                <span>上传文件</span>
+              </div>
+            </Uploader>
+          </div>
+
+          <div class="bg-white deli--container">
+            <!-- 上传的文件列表 -->
+            <div class="file--list">
+              <div class="flex justify-between file--item items-center my-10" v-for="item in form.fileList"
+                :key="item.ossId">
+                <span class="file--item---title"> {{ item.fileName }}</span>
+                <van-button class="file--item---action" type="danger" icon="clear" size="mini"
+                  @click="handleFileItemRemove(item)">删除</van-button>
+              </div>
+            </div>
+          </div>
+        </CardBox>
+
+        <!-- 分割线 -->
+        <van-divider
+          :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px', marginTop: '40px' }">其它选项</van-divider>
+
+        <van-button @click="doAction('showFilterList', 1)" size="small" type="info" plain block
+          class="btn--action">展开全部必查项</van-button>
+
+        <van-button @click="doAction('showFilterList', 0)" size="small" type="info" plain block
+          class="btn--action">展开全部检查项</van-button>
+
+      </template>
+
+      <!-- 底部操作栏 -->
+      <div class="flex justify-center fixed--bottom bg--white p-15 z-2 shadow--top">
+        <template v-if="showConfirm">
+          <van-button class="fxied--bottom---action" @click="debounceCancel" size="small" type="danger" plain
+            style="width: 120px" icon="clear">取消</van-button>
+          <van-button class="fxied--bottom---action" @click="debounceConfirm" size="small" type="info" icon="checked"
+            style="width: 120px">提交</van-button>
+        </template>
+
+        <template v-else>
+          <van-button class="fxied--bottom---action" @click="debounceEndCheck('omg')" size="small" type="danger" plain
+            style="width: 120px" icon="passed">检查结束</van-button>
+          <van-button class="fxied--bottom---action" @click="debounceContinueCheck" size="small" type="info"
+            icon="arrow" style="width: 120px">继续检查</van-button>
+        </template>
+      </div>
+
+      <!-- 展开检查项列表模式 -->
+      <transition name="bounce">
+        <ListMode v-if="listMode" :type="listModeType" :list="list" @cancel="listMode = false"></ListMode>
+      </transition>
+
+      <!-- 检查项查询面板 -->
+      <transition name="bounce">
+        <TypeSearchPanel v-if="show.typeSearchPanel" @confirm="handleCheckItemSelect"
+          @close="show.typeSearchPanel = false">
+        </TypeSearchPanel>
+      </transition>
     </div>
+  </div>
 </template>
 
 <script>
@@ -185,7 +183,7 @@ import { addRealMonitor } from '@/api/system/realMonitor'
 import { addSgsMonitor } from '@/api/system/sgsMonitor'
 
 let ListModeMixin = {
-  data () {
+  data() {
     return {
       listMode: false,
       listModeType: -1
@@ -194,7 +192,7 @@ let ListModeMixin = {
 }
 
 const RequirementMixin = {
-  data () {
+  data() {
     return {
       showRequirementActionSheet: false,
       requirementFileList: [],
@@ -203,13 +201,13 @@ const RequirementMixin = {
   },
 
   computed: {
-    shouldDisabledRequirementSubmit () {
+    shouldDisabledRequirementSubmit() {
       return this.requirementFileList.length === 0
     }
   },
 
   methods: {
-    async handleRequirementSubmit () {
+    async handleRequirementSubmit() {
       let __checkType__ = this.__checkType__
 
       if (this.requirementFileList.length === 0) {
@@ -248,15 +246,15 @@ const RequirementMixin = {
 
         /**
          * 第三方检查
-         * @param {String} list 
+         * @param {String} list
          */
         sgs: function (list) {
           let tmsSgsMoniterDetails = []
 
           // TODO:
           // - 是否需要增加检查周期的参数
-          let { sgsType } = this.$route.query
-       
+          let { sgsType, ruleTimeType } = this.$route.query
+
           let data = {
             // 运单Id
             waybillId,
@@ -264,8 +262,10 @@ const RequirementMixin = {
             tmsSgsMoniterDetails,
             evidPic,
             evidVid,
-            sgsType
+            sgsType: +sgsType
           }
+
+          data.dataType = +ruleTimeType
 
           addSgsMonitor(data).then(res => {
             debugger
@@ -285,17 +285,17 @@ const RequirementMixin = {
       func && func.call(this, this.requirementFileList)
     },
 
-    handleRequirementPhotoUploadSuccess (data) {
+    handleRequirementPhotoUploadSuccess(data) {
       data.file.type = 'photo'
       this.requirementFileList.push(data.file)
     },
 
-    handleRequirementVideoUploadSuccess (data) {
+    handleRequirementVideoUploadSuccess(data) {
       data.file.type = 'video'
       this.requirementFileList.push(data.file)
     },
 
-    handleRequirementFileItemRemove (item) {
+    handleRequirementFileItemRemove(item) {
       this.$toast('正在删除...')
       let ossId = item.ossId
       let list = this.requirementFileList
@@ -311,7 +311,7 @@ const RequirementMixin = {
       })
     }
   },
-  created () {
+  created() {
     // if(process.env.NODE_ENV === 'development') {
     //     this.requirementFileList = [
     //         { "ossId": "1663415902280806401", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/25480707b75943fa8b3fd2e7788069b8.png", "fileName": "iShot_2023-05-15_16.52.54.png", "type": "photo" }, { "ossId": "1663415953115770882", "url": "http://zsh-pyzl.oss-cn-shenzhen.aliyuncs.com/2023/05/30/443f43a6cad44be5b32f1ddcf52b6764.mp4", "fileName": "testvideo.mp4", "type": "video" },
@@ -344,7 +344,7 @@ export default {
     TypeSearchPanel
   },
 
-  data () {
+  data() {
     return {
       // 运单号
       deliNo: '',
@@ -377,7 +377,7 @@ export default {
   },
 
   methods: {
-    handleModelChange (name) {
+    handleModelChange(name) {
       debugger
       console.log(this.form.required)
     },
@@ -386,26 +386,26 @@ export default {
          * 添加文件
          * @param {File} file 文件对象表示
          */
-    addFile (file) {
+    addFile(file) {
       this.form.fileList.push(file)
     },
 
-    handlePhotoUploadSuccess (data) {
+    handlePhotoUploadSuccess(data) {
       this.addFile(data.file)
     },
 
-    handleVideoUploadSuccess (data) {
+    handleVideoUploadSuccess(data) {
       this.addFile(data.file)
     },
 
-    handleFileUploadSuccess (data) {
+    handleFileUploadSuccess(data) {
       this.addFile(data.file)
     },
 
     /**
          * 验证当前表单项是否有效
          */
-    isCurrentFormItemValidate () {
+    isCurrentFormItemValidate() {
       let f = this.form
       let type = f.type.trim()
       if (type === '') {
@@ -434,7 +434,7 @@ export default {
     /**
          * 继续检查
          */
-    handleContinueCheck () {
+    handleContinueCheck() {
       if (!this.isCurrentFormItemValidate()) {
         return
       }
@@ -447,7 +447,7 @@ export default {
     /**
          * 删除文件处理
          */
-    handleFileItemRemove (item) {
+    handleFileItemRemove(item) {
       this.$toast('正在删除...')
       debugger
       let ossId = item.ossId
@@ -464,13 +464,14 @@ export default {
       })
     },
 
-    handleIconItemClicked (type) {
+    handleIconItemClicked(type) {
       console.log('log type:')
       console.log(type)
     },
 
-    handleEndCheck (state) {
-      function beforeClose (action, done) {
+    handleEndCheck(state) {
+      debugger
+      function beforeClose(action, done) {
         if (action === 'confirm') {
           this.handleSubmit([])
             .then((res) => {
@@ -534,14 +535,14 @@ export default {
       this.showConfirm = true
     },
 
-    handleCancel () {
+    handleCancel() {
       this.showConfirm = false
     },
 
     /**
      * 确认操作
      */
-    handleConfirm () {
+    handleConfirm() {
       this.isSubmiting = true
       this.handleSubmit(this.previewList)
         .then((res) => {
@@ -560,7 +561,7 @@ export default {
         })
     },
 
-    doAction (action, options) {
+    doAction(action, options) {
       let actionStrategies = {
         /**
          * 进行检查
@@ -605,7 +606,7 @@ export default {
       func && func.call(this, options)
     },
 
-    handleCheckItemSelect (item) {
+    handleCheckItemSelect(item) {
       this.show.typeFilter = false
       this.form.source = item
       this.form.type = item.briefCont
@@ -617,12 +618,12 @@ export default {
     /**
      * 处理车辆输入
      */
-    handleTypeInput () {
+    handleTypeInput() {
       this.show.typeSearchPanel = true
     }
   },
 
-  created () {
+  created() {
     let q = this.$route.query
     // 运单号
     this.deliNo = q.deliNo
@@ -642,256 +643,256 @@ export default {
 $dropdown-bg: #f8f9fb;
 
 .select--view {
-    // padding-bottom: 230px;
-    padding-bottom: 90px;
+  // padding-bottom: 230px;
+  padding-bottom: 90px;
 }
 
 .check--action {
-    padding-top: 15px;
-    padding-bottom: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .high--contract {
-    // background: #d5d5d5;
-    border-bottom: 1px solid #15151540;
+  // background: #d5d5d5;
+  border-bottom: 1px solid #15151540;
 }
 
 .icon-item {
-    font-size: 50px;
+  font-size: 50px;
 }
 
 .btn--action {
-    &~& {
-        margin-top: 10px;
-    }
+  &~& {
+    margin-top: 10px;
+  }
 }
 
 .shadow--top {
-    box-shadow: rgb(196 196 196 / 50%) 3px -5px 10px 0px;
+  box-shadow: rgb(196 196 196 / 50%) 3px -5px 10px 0px;
 }
 
 .is--tiny {
-    .field--wrapper {
-        margin-top: -20px;
-    }
+  .field--wrapper {
+    margin-top: -20px;
+  }
 }
 
 // 侧滑动画
 .bounce-enter-active {
-    animation: bounce-in 0.2s;
+  animation: bounce-in 0.2s;
 }
 
 .bounce-leave-active {
-    animation: bounce-in 0.2s reverse;
+  animation: bounce-in 0.2s reverse;
 }
 
 @keyframes bounce-in {
-    0% {
-        transform: translateX(100%);
-    }
+  0% {
+    transform: translateX(100%);
+  }
 
-    50% {
-        transform: translateX(30%);
-    }
+  50% {
+    transform: translateX(30%);
+  }
 
-    100% {
-        transform: translateX(0%);
-    }
+  100% {
+    transform: translateX(0%);
+  }
 }
 
 .file--item {
-    font-size: 16px;
+  font-size: 16px;
 
-    &---title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
-    }
+  &---title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
 
-    &---action {
-        width: 100px;
-    }
+  &---action {
+    width: 100px;
+  }
 }
 
 // 检查项汇总
 
 // +++++++++++++ 表格相关样式 START ++++++++++
 .clear--float {
-    clear: both;
-    float: left;
-    width: 100%;
+  clear: both;
+  float: left;
+  width: 100%;
 }
 
 .table-column {
-    &--item {
-        width: 25%;
-        float: left;
-        font-size: 10px;
-        text-align: center;
-        padding: 5px 0;
-        background: #f8f9fb;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+  &--item {
+    width: 25%;
+    float: left;
+    font-size: 10px;
+    text-align: center;
+    padding: 5px 0;
+    background: #f8f9fb;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-    border-bottom: 1px solid #d5d5d5;
+  border-bottom: 1px solid #d5d5d5;
 
-    &.is--head {
-        border-bottom-width: 2px;
-    }
+  &.is--head {
+    border-bottom-width: 2px;
+  }
 
-    &:last-child {
-        border-bottom: none;
-    }
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .table-row {
-    position: relative;
+  position: relative;
 
-    &::after {
-        position: absolute;
-        content: "";
-        height: 1px;
-        background: #d5d5d5;
-        width: 100%;
-        top: 100%;
+  &::after {
+    position: absolute;
+    content: "";
+    height: 1px;
+    background: #d5d5d5;
+    width: 100%;
+    top: 100%;
+  }
+
+  &.is-head::after {
+    width: calc(100% - 60px);
+    left: 60px;
+    height: 2px;
+  }
+
+  span {
+    // background: #fff;
+    height: 35px;
+    flex: 1;
+
+    &.header-cell {
+      font-weight: 500;
     }
 
-    &.is-head::after {
-        width: calc(100% - 60px);
-        left: 60px;
-        height: 2px;
+    &.checkbox-cell {
+      flex: 0 0 60px;
     }
 
-    span {
-        // background: #fff;
-        height: 35px;
-        flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-        &.header-cell {
-            font-weight: 500;
-        }
+    color: #151515;
+    font-weight: 350;
 
-        &.checkbox-cell {
-            flex: 0 0 60px;
-        }
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        color: #151515;
-        font-weight: 350;
-
-        &.is--important {
-            color: #be0004;
-        }
-
-        &.hidden {
-            visibility: hidden;
-        }
-
-        @at-root .w100 & {
-            flex: 0 0 100px;
-        }
+    &.is--important {
+      color: #be0004;
     }
+
+    &.hidden {
+      visibility: hidden;
+    }
+
+    @at-root .w100 & {
+      flex: 0 0 100px;
+    }
+  }
 }
 
 .icon--group {
-    display: flex;
-    justify-content: space-between;
-    padding-left: 10px;
-    padding-right: 10px;
+  display: flex;
+  justify-content: space-between;
+  padding-left: 10px;
+  padding-right: 10px;
 
-    &.is-requirement--popup {
-        padding-top: 10px;
-        padding-bottom: 10px;
+  &.is-requirement--popup {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  &.is--center {
+    justify-content: center;
+  }
+
+  &--spliter {
+    position: relative;
+    height: 100%;
+
+    &::after {
+      position: absolute;
+      content: '或';
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 20px;
+      margin-left: 20px;
+      margin-right: 20px;
     }
-
-    &.is--center {
-        justify-content: center;
-    }
-
-    &--spliter {
-        position: relative;
-        height: 100%;
-
-        &::after {
-            position: absolute;
-            content: '或';
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 20px;
-            margin-left: 20px;
-            margin-right: 20px;
-        }
-    }
+  }
 }
 
 .upload--inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .fxied--bottom---action {
-    &~& {
-        margin-left: 30px;
-    }
+  &~& {
+    margin-left: 30px;
+  }
 }
 
 .card--list {
-    margin-top: 60px;
+  margin-top: 60px;
 }
 
 .card--box {
-    background: #f7f7f7;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
+  background: #f7f7f7;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
 
 }
 
 .card--row {
-    font-size: 16px;
+  font-size: 16px;
 
-    &.is--header {
-        font-size: 20px;
-        font-weight: 500;
-        margin-bottom: 5px;
-    }
+  &.is--header {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
 }
 
 .fixed--title {
-    position: fixed;
-    left: 0;
-    right: 0;
-    background: #fff !important;
-    padding: 0 15px;
-    top: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: #fff !important;
+  padding: 0 15px;
+  top: 0;
 }
 
 // RequireMent Popup
 // @date 2023-05-30 13:49
 .requirement-popup {
-    &--container {
-        position: relative;
-        height: 50vh;
-    }
+  &--container {
+    position: relative;
+    height: 50vh;
+  }
 
-    &--action {
-        position: fixed;
-        bottom: 0px;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: center;
-        padding-bottom: calc(10px + constant(safe-area-inset-bottom));
-        /* 兼容 iOS < 11.2 */
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        /* 兼容 iOS >= 11.2 */
-    }
+  &--action {
+    position: fixed;
+    bottom: 0px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    padding-bottom: calc(10px + constant(safe-area-inset-bottom));
+    /* 兼容 iOS < 11.2 */
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    /* 兼容 iOS >= 11.2 */
+  }
 }
 </style>
